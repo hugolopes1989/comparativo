@@ -240,15 +240,15 @@ input.val{width:110px;text-align:right}
   <section id="tab-ppi" class="hide">
     <div class="section-h" id="ppi-sim" style="margin-top:0">
       <h2>Simulador PPI · oportunidades de mercado</h2>
-      <span class="hint">Digite o PPI com tributos (R$/L) e veja onde a importação compete com refinaria</span>
+      <span class="hint">Escolha a filial, digite o PPI com tributos (R$/L) e veja se a importação compete com a refinaria</span>
     </div>
     <div class="card">
       <div class="form-grid" style="align-items:end">
-        <label class="f">PPI Gasolina A <input type="text" inputmode="decimal" class="num ppi-in" data-p="GAA"></label>
-        <label class="f">PPI Diesel S10 <input type="text" inputmode="decimal" class="num ppi-in" data-p="S10"></label>
-        <label class="f">PPI Diesel S500 <input type="text" inputmode="decimal" class="num ppi-in" data-p="S500" placeholder="opcional"></label>
-        <label class="f" style="justify-content:flex-end"><button class="btn" id="ppiReset">Voltar ao último PPI</button></label>
-        <label class="f" style="justify-content:flex-end"><button class="btn primary" id="ppiSave">Salvar como PPI de hoje</button></label>
+        <label class="f">Filial <select id="ppiBase"><option value="">Selecione a filial</option></select></label>
+        <label class="f">PPI Gasolina A <input type="text" inputmode="decimal" class="num ppi-in" data-p="GAA" placeholder="R$/L"></label>
+        <label class="f">PPI Diesel S10 <input type="text" inputmode="decimal" class="num ppi-in" data-p="S10" placeholder="R$/L"></label>
+        <label class="f">PPI Diesel S500 <input type="text" inputmode="decimal" class="num ppi-in" data-p="S500" placeholder="R$/L"></label>
+        <label class="f" style="justify-content:flex-end"><button class="btn" id="ppiReset">Limpar</button></label>
       </div>
       <div class="hint" id="ppiInfo" style="padding:0 14px 12px"></div>
     </div>
@@ -596,49 +596,39 @@ $('#mSave').addEventListener('click',async()=>{
 });
 
 
-/* ---------- simulador PPI ---------- */
-state.ppiSim=null;
-function lastPPI(){const o={};for(const p of PRODS){const x=lastTwo('ppi','PPI|'+p).cur;o[p]=x?{total:x.total,data:x.data}:null;}return o;}
+/* ---------- simulador PPI (só simulação, nada é salvo) ---------- */
+state.ppiSim={GAA:null,S10:null,S500:null};state.ppiBase='';
 function initPPI(force){
-  const L=lastPPI();
-  if(!state.ppiSim||force){state.ppiSim={};for(const p of PRODS)state.ppiSim[p]=L[p]?L[p].total:null;
-    document.querySelectorAll('.ppi-in').forEach(i=>{const v=state.ppiSim[i.dataset.p];i.value=v==null?'':f4(v);});}
-  const ds=PRODS.filter(p=>L[p]).map(p=>PNAME[p]+' '+dBR(L[p].data));
-  $('#ppiInfo').textContent=ds.length?'Último PPI lançado: '+ds.join(' · ')+'. Alterar os campos só simula; "Salvar" grava como PPI de hoje.':'Nenhum PPI lançado ainda.';
+  const sel=$('#ppiBase');const bs=bases().filter(b=>b!=='PPI');
+  if(!bs.includes(state.ppiBase))state.ppiBase='';
+  sel.replaceChildren(el('option',{value:''},'Selecione a filial'),...bs.map(b=>el('option',{value:b},baseLabel(b))));sel.value=state.ppiBase;
+  if(force){for(const p of PRODS)state.ppiSim[p]=null;document.querySelectorAll('.ppi-in').forEach(i=>i.value='');}
+  $('#ppiInfo').textContent='Simulação: nada é salvo e não fica histórico. Os campos começam vazios.';
 }
 function renderPPI(){
-  const tb=$('#ppiTable tbody');tb.replaceChildren();let n=0;
-  for(const b of bases()){ if(b==='PPI')continue;
-    for(const p of PRODS){
-      const ppi=state.ppiSim&&state.ppiSim[p];if(ppi==null)continue;
-      const P=lastTwo('petrobras',b+'|'+p).cur,A=lastTwo('acelen',b+'|'+p).cur;if(!P&&!A)continue;n++;
+  const tb=$('#ppiTable tbody');tb.replaceChildren();let n=0;const b=state.ppiBase;
+  if(b)for(const p of PRODS){
+      const ppi=state.ppiSim[p];if(ppi==null)continue;
+      const P=lastTwo('petrobras',b+'|'+p).cur,A=lastTwo('acelen',b+'|'+p).cur;n++;
       const dP=P?ppi-P.total:null,dA=A?ppi-A.total:null;
       const cell=v=>v==null?el('td',{class:'r muted'},'—'):el('td',{class:'r'},el('span',{class:'num '+(v<0?'delta-down':'delta-up')},sgn(v)));
       const refs=[P&&P.total,A&&A.total].filter(x=>x!=null);const mn=Math.min(...refs);
       let lei;
-      if(P&&A&&ppi<mn)lei=el('span',{class:'tag',style:'color:var(--good);font-weight:600'},el('span',{class:'dot',style:'background:var(--good)'}),'Importação compensa');
+      if(!refs.length)lei=el('span',{class:'tag muted'},'Sem preço de refinaria nesta filial');
+      else if(P&&A&&ppi<mn)lei=el('span',{class:'tag',style:'color:var(--good);font-weight:600'},el('span',{class:'dot',style:'background:var(--good)'}),'Importação compensa');
       else if(A&&ppi<A.total)lei=el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--acelen)'}),P?'Abaixo só da Acelen':'Abaixo da Acelen');
       else if(P&&ppi<P.total)lei=el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--pb)'}),A?'Abaixo só da PB':'Abaixo da PB');
       else lei=el('span',{class:'tag muted'},'Refinaria mais barata');
       tb.append(el('tr',{},el('td',{},baseLabel(b)),el('td',{},PNAME[p]),el('td',{class:'r num'},f4(ppi)),el('td',{class:'r num'},P?f4(P.total):'—'),cell(dP),el('td',{class:'r num'},A?f4(A.total):'—'),cell(dA),el('td',{},lei)));
-    }
   }
-  if(!n)tb.append(el('tr',{},el('td',{colspan:8,class:'empty'},'Digite um PPI para simular.')));
+  if(!n)tb.append(el('tr',{},el('td',{colspan:8,class:'empty'},b?'Digite o PPI de pelo menos um produto.':'Selecione a filial e digite o PPI.')));
 }
 document.querySelectorAll('.ppi-in').forEach(i=>{
   i.addEventListener('input',()=>{const v=parseNum(i.value);state.ppiSim[i.dataset.p]=isNaN(v)?null:v;renderPPI();});
   i.addEventListener('blur',()=>{const v=parseNum(i.value);if(!isNaN(v))i.value=f4(v);});
 });
+$('#ppiBase').addEventListener('change',e=>{state.ppiBase=e.target.value;renderPPI();});
 $('#ppiReset').addEventListener('click',()=>{initPPI(true);renderPPI();});
-$('#ppiSave').addEventListener('click',async()=>{
-  if(!state.db)return;const T=state.config&&state.config.tributos||{};const itens={};
-  for(const p of PRODS){const v=state.ppiSim[p];if(v==null)continue;const t=T[p]||{};const valor=Math.round((v-(+t.pis||0)-(+t.cide||0)-(+t.icms||0))*10000)/10000;itens['PPI|'+p]={valor,pis:+t.pis||0,cide:+t.cide||0,icms:+t.icms||0,outros:0};}
-  if(!Object.keys(itens).length){toast('Nenhum PPI preenchido');return;}
-  const d=today();const btn=$('#ppiSave');btn.disabled=true;
-  try{await state.db.doc(`precos/${d}_ppi`).set({data:d,fornecedor:'ppi',origem:'manual',itens,salvoEm:new Date().toISOString()});toast('PPI salvo para '+dBR(d));state.ppiSim=null;}
-  catch(e){toast('Não foi possível salvar');}
-  btn.disabled=false;
-});
 
 /* ---------- variação produto final ---------- */
 const FINAL={GAA:'Gasolina C',S10:'Diesel B S10',S500:'Diesel B S500'};
@@ -798,7 +788,7 @@ async function boot(){
   const h=(location.hash||'').slice(1);if(['painel','tendencia','variacao','ppi','historico','ofertas','config'].includes(h))showTab(h);
   const D=window.__DADOS;if(!D){msg('bad','Não foi possível carregar os dados do painel.');return;}
   state.canWrite=false;
-  ['#btnLancar','#ofForm','#taxSave','#ppiSave','#mixSave'].forEach(q=>$(q).classList.add('hide'));
+  ['#btnLancar','#ofForm','#taxSave','#mixSave'].forEach(q=>$(q).classList.add('hide'));
   state.config=D.config;state.snaps=D.precos;state.ofertas=D.ofertas;state.tend=D.tendencia||[];
   const g=new Date(D.geradoEm);$('#geradoEm').textContent='Atualizado em '+g.toLocaleDateString('pt-BR')+' às '+g.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   renderAll();
