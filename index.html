@@ -323,7 +323,6 @@ input.val{width:110px;text-align:right}
         <div class="seg" id="mForn">
           <button data-f="petrobras" aria-pressed="true">Petrobras</button>
           <button data-f="acelen" aria-pressed="false">Acelen</button>
-          <button data-f="ppi" aria-pressed="false">PPI</button>
         </div>
         <label class="f">Data de vigência <input type="date" id="mData"></label>
       </div>
@@ -439,7 +438,7 @@ function renderPainel(){
     ));
   }
   // PPI reference
-  const ppi=PRODS.map(p=>({p,x:lastTwo('ppi','PPI|'+p)})).filter(o=>o.x.cur);
+  const ppi=[];
   if(ppi.length&&(state.prodFilter==='todos'||ppi.some(o=>o.p===state.prodFilter))){
     tb.append(el('tr',{class:'grp'},el('td',{colspan:NC},'Referência PPI (paridade de importação)')));
     for(const o of ppi){ if(state.prodFilter!=='todos'&&o.p!==state.prodFilter)continue;
@@ -452,15 +451,15 @@ function renderPainel(){
 /* ---------- histórico ---------- */
 function fillHistSelects(){
   const hb=$('#hBase'),hp=$('#hProd');const cb=hb.value,cp=hp.value;
-  hb.replaceChildren(...bases().map(b=>el('option',{value:b},baseLabel(b))));
-  hb.value=cb&&bases().includes(cb)?cb:(bases()[0]||'');
-  const prods=PRODS.filter(p=>['acelen','petrobras','ppi'].some(f=>hasItem(f,hb.value,p)));
+  const hbs=bases().filter(b=>b!=='PPI');hb.replaceChildren(...hbs.map(b=>el('option',{value:b},baseLabel(b))));
+  hb.value=cb&&hbs.includes(cb)?cb:(hbs[0]||'');
+  const prods=PRODS.filter(p=>['acelen','petrobras'].some(f=>hasItem(f,hb.value,p)));
   hp.replaceChildren(...prods.map(p=>el('option',{value:p},PNAME[p])));
   hp.value=prods.includes(cp)?cp:(prods[0]||'');
 }
 function seriesFor(b,p){
   const key=b+'|'+p;const out=[];
-  for(const f of ['acelen','petrobras','ppi']){const pts=snapsOf(f).map(s=>s.itens&&s.itens[key]&&+s.itens[key].valor>0?{d:s.data,v:total(s.itens[key]),f}:null).filter(Boolean);if(pts.length)out.push({f,pts});}
+  for(const f of ['acelen','petrobras']){const pts=snapsOf(f).map(s=>s.itens&&s.itens[key]&&+s.itens[key].valor>0?{d:s.data,v:total(s.itens[key]),f}:null).filter(Boolean);if(pts.length)out.push({f,pts});}
   return out;
 }
 function renderChart(){
@@ -503,7 +502,7 @@ function renderChart(){
 }
 function renderLanc(){
   const tb=$('#lancTable tbody');tb.replaceChildren();
-  const s=[...state.snaps].sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:a.fornecedor.localeCompare(b.fornecedor));
+  const s=state.snaps.filter(x=>x.fornecedor!=="ppi").sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:a.fornecedor.localeCompare(b.fornecedor));
   if(!s.length)tb.append(el('tr',{},el('td',{colspan:5,class:'empty'},'Nenhum lançamento.')));
   for(const x of s){
     const del=el('button',{class:'btn ghost sm',onclick:async(e)=>{const btn=e.currentTarget;if(btn.dataset.confirm!=='1'){btn.dataset.confirm='1';btn.textContent='Confirmar exclusão';setTimeout(()=>{btn.dataset.confirm='';btn.textContent='Excluir';},3500);return;}try{btn.disabled=true;await state.db.doc('precos/'+x.id).delete();toast('Lançamento excluído');}catch(err){btn.disabled=false;toast('Não foi possível excluir');}}},'Excluir');
