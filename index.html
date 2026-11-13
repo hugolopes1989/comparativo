@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comparativo Acelen × Petrobras · Visualização</title>
+<title>Comparativo Acelen × Petrobras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:light;
   --bg:#f4f3ef; --surface:#fcfcfb; --surface-2:#f0efea; --line:#e2e0d8; --line-2:#cfccc2;
   --text:#121211; --text-2:#52514e; --text-3:#85837c;
-  --acelen:#2a78d6; --pb:#eb6834; --ppi:#85837c; --oferta:#6250d6;
+  --acelen:#2f9be0; --pb:#13834a; --ppi:#85837c; --oferta:#6250d6;
+  --brand:#001B86; --brand-2:#2B4FA3; --orange:#F7941D; --orange-2:#EE6A2A; --brand-text:#001B86;
   --good:#0f7b3f; --good-bg:#e3f3e8; --warn:#9a6200; --warn-bg:#fdf1d6; --bad:#b42318; --bad-bg:#fde8e6;
-  --accent:#121211; --accent-text:#fcfcfb;
+  --accent:#001B86; --accent-text:#ffffff;
   --radius:12px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme:dark){
@@ -22,25 +23,35 @@
     color-scheme:dark;
     --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#2e2e2b; --line-2:#3c3c38;
     --text:#f0efec; --text-2:#c3c2b7; --text-3:#8d8c84;
-    --acelen:#3987e5; --pb:#d95926; --ppi:#8d8c84; --oferta:#9085e9;
+    --acelen:#5cb6ee; --pb:#3fbf73; --ppi:#8d8c84; --oferta:#9085e9; --brand:#0a2496; --brand-2:#2B4FA3; --orange:#F7941D; --orange-2:#EE6A2A; --brand-text:#9fb4ff;
     --good:#5fd08f; --good-bg:#183526; --warn:#f0b54a; --warn-bg:#3a2c0d; --bad:#ff8a80; --bad-bg:#3d1b18;
-    --accent:#f0efec; --accent-text:#121211; --shadow:none;
+    --accent:#9fb4ff; --accent-text:#0b1033; --shadow:none;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#2e2e2b; --line-2:#3c3c38;
   --text:#f0efec; --text-2:#c3c2b7; --text-3:#8d8c84;
-  --acelen:#3987e5; --pb:#d95926; --ppi:#8d8c84; --oferta:#9085e9;
+  --acelen:#5cb6ee; --pb:#3fbf73; --ppi:#8d8c84; --oferta:#9085e9; --brand:#0a2496; --brand-2:#2B4FA3; --orange:#F7941D; --orange-2:#EE6A2A; --brand-text:#9fb4ff;
   --good:#5fd08f; --good-bg:#183526; --warn:#f0b54a; --warn-bg:#3a2c0d; --bad:#ff8a80; --bad-bg:#3d1b18;
-  --accent:#f0efec; --accent-text:#121211; --shadow:none;
+  --accent:#9fb4ff; --accent-text:#0b1033; --shadow:none;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45}
 .num{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
-header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
-h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-.02em}
+header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:16px;background:var(--brand);color:#fff;border-radius:16px;padding:18px 22px;position:relative;overflow:hidden}
+header.top>*{position:relative;z-index:1}
+header.top .deco{position:absolute;inset:0;z-index:0;pointer-events:none}
+.brandrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brandrow img{height:38px;width:auto;display:block}
+.brandsep{width:1px;height:34px;background:rgba(255,255,255,.35)}
+header.top h1{color:#fff}
+header.top .sub{color:rgba(255,255,255,.82)}
+header.top .pill{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.85)}
+header.top .pill b{color:#fff}
+header.top .pill .dot{box-shadow:0 0 0 2px rgba(255,255,255,.6)}
+h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em}
 .sub{color:var(--text-2);margin-top:4px;font-size:13px}
 .status{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--text-2)}
@@ -49,9 +60,11 @@ h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-.02em}
 .pill.warn{background:var(--warn-bg);border-color:transparent;color:var(--warn)}
 .pill.warn b{color:var(--warn)}
 button{font:inherit;cursor:pointer}
-.btn{border:1px solid var(--line-2);background:var(--surface);color:var(--text);border-radius:9px;padding:8px 14px;font-weight:500}
+.btn{border:1px solid var(--line-2);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 16px;font-weight:600}
 .btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.btn.orange{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700;padding:10px 20px}
+.btn.orange:hover{background:var(--orange-2);border-color:var(--orange-2);opacity:1}
 .btn.primary:hover{opacity:.9}
 .btn.sm{padding:5px 10px;font-size:12px}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--text-2)}
@@ -59,18 +72,18 @@ button{font:inherit;cursor:pointer}
 .btn:disabled{opacity:.5;cursor:default}
 nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
 nav.tabs button{border:0;background:none;padding:10px 12px;color:var(--text-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
-nav.tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--text)}
+nav.tabs button[aria-selected="true"]{color:var(--brand-text);border-bottom-color:var(--orange);font-weight:700}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:16px}
-.kpi{padding:14px 16px}
+.kpi{padding:14px 16px;box-shadow:inset 0 3px 0 var(--orange),var(--shadow)}
 .kpi .lab{font-size:12px;color:var(--text-2);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-.kpi .big{font-size:26px;font-weight:600;margin:6px 0 2px;letter-spacing:-.02em}
+.kpi .big{font-size:26px;font-weight:700;margin:6px 0 2px;letter-spacing:-.02em;color:var(--brand-text)}
 .kpi .note{font-size:12px;color:var(--text-2)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
 .chip{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--text-2)}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
 .section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 10px}
-.section-h h2{font-size:15px;font-weight:600;margin:0}
+.section-h h2{font-size:15px;font-weight:700;margin:0;padding-left:10px;border-left:3px solid var(--orange)}
 .hint{font-size:12px;color:var(--text-3)}
 .tablewrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%}
@@ -96,7 +109,7 @@ tr.grp td{background:var(--surface-2);font-weight:600;font-size:12px;color:var(-
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;padding:14px}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-2);font-weight:500}
 input,select{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:7px 9px;min-width:0}
-input:focus,select:focus{outline:2px solid var(--acelen);outline-offset:-1px;border-color:transparent}
+input:focus,select:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
 input.val{width:110px;text-align:right}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:flex-start;justify-content:center;z-index:20;padding:30px 12px;overflow:auto}
 .overlay.open{display:flex}
@@ -105,7 +118,7 @@ input.val{width:110px;text-align:right}
 .modal-h h3{margin:0;font-size:16px}
 .modal-b{padding:14px 18px}
 .modal-f{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
-.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
 .seg button{border:0;background:var(--surface);padding:7px 12px;color:var(--text-2);font-weight:500}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-text)}
 .banner{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px}
@@ -115,19 +128,42 @@ input.val{width:110px;text-align:right}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--accent-text);padding:10px 16px;border-radius:10px;font-size:13px;display:none;z-index:30}
 .empty{padding:28px;text-align:center;color:var(--text-3)}
 .hide{display:none!important}
-@media (max-width:640px){ th,td{padding:8px} .bar{display:none} h1{font-size:19px} }
+.trend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-bottom:14px}
+.trend{padding:16px 18px;position:relative}
+.trend .lab{font-size:12px;color:var(--text-2);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.trend .dir{display:flex;align-items:center;gap:10px;margin:8px 0 4px}
+.trend .arrow{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex:none}
+.trend .arrow.up{background:var(--bad-bg);color:var(--bad)} .trend .arrow.down{background:var(--good-bg);color:var(--good)} .trend .arrow.flat{background:var(--surface-2);color:var(--text-2)}
+.trend .word{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.force{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border-radius:999px;padding:3px 9px;background:var(--surface-2);color:var(--text-2)}
+.force i{width:6px;height:10px;border-radius:2px;background:var(--line-2);display:inline-block}
+.force i.on{background:var(--orange)}
+.trend .range{font-size:13px;color:var(--text-2);margin-top:6px}
+.eff{font-weight:700;font-size:12px}
+.eff.up{color:var(--bad)} .eff.down{color:var(--good)} .eff.flat{color:var(--text-3)}
+.note-box{padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.55}
+.note-box b{color:var(--text)}
+.okbadge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700}
+.okbadge.y{background:var(--good-bg);color:var(--good)} .okbadge.n{background:var(--bad-bg);color:var(--bad)} .okbadge.p{background:var(--surface-2);color:var(--text-3)}
+.mini{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:640px){ th,td{padding:8px} .bar{display:none} h1{font-size:19px} .brandsep{display:none} header.top{padding:16px} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div>
-      <h1>Comparativo Acelen × Petrobras</h1>
-      <div class="sub">Preço com tributos (R$/L) por base · Acelen sempre com desconto MP · <span id="geradoEm"></span></div>
-      <div class="status" id="status"></div>
+    <svg class="deco" viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true"><path d="M820 -10 C 930 40, 960 110, 900 175" fill="none" stroke="#F7941D" stroke-width="2"/><path d="M870 -10 C 990 50, 1010 120, 960 175" fill="none" stroke="#F7941D" stroke-opacity=".45" stroke-width="1.5"/></svg>
+    <div class="brandrow">
+      <img src="logo-larco.png" alt="Larco">
+      <span class="brandsep"></span>
+      <div>
+        <h1>Comparativo Acelen × Petrobras</h1>
+        <div class="sub">Preço com tributos (R$/L) por base · Acelen sempre com desconto MP · <span id="geradoEm"></span></div>
+        <div class="status" id="status"></div>
+      </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn primary" id="btnLancar">+ Lançar preços</button>
+      <button class="btn orange" id="btnLancar">+ Lançar preços</button>
     </div>
   </header>
 
@@ -135,6 +171,8 @@ input.val{width:110px;text-align:right}
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="painel" aria-selected="true">Painel</button>
+    <button role="tab" data-tab="tendencia" aria-selected="false">Tendência Acelen</button>
+    <button role="tab" data-tab="variacao" aria-selected="false">Variação produto final</button>
     <button role="tab" data-tab="ppi" aria-selected="false">Simulador PPI</button>
     <button role="tab" data-tab="historico" aria-selected="false">Histórico</button>
     <button role="tab" data-tab="ofertas" aria-selected="false">Ofertas</button>
@@ -165,6 +203,36 @@ input.val{width:110px;text-align:right}
     <div class="hint" style="margin-top:8px" id="cmpHint"></div>
 
 
+  </section>
+
+  <!-- TENDENCIA -->
+  <section id="tab-tendencia" class="hide">
+    <div class="section-h" style="margin-top:0"><h2>Para onde vai o próximo reajuste da Acelen</h2><span class="hint" id="tdStatus"></span></div>
+    <div class="trend-grid" id="tdCards"></div>
+    <div class="section-h"><h2>O que está puxando</h2><span class="hint" id="tdJanela"></span></div>
+    <div class="card tablewrap"><table id="tdDrivers"><thead><tr><th>Indicador</th><th class="r">Semana anterior</th><th class="r">Agora</th><th class="r">Variação</th><th>Efeito no preço</th></tr></thead><tbody></tbody></table></div>
+    <div class="card note-box" id="tdNota" style="margin-top:10px"></div>
+    <div class="section-h"><h2>Por base</h2><span class="hint">Mesma direção para todas as bases, aplicada ao preço atual de cada uma</span></div>
+    <div class="chips" id="tdProdChips"></div>
+    <div class="card tablewrap"><table id="tdBases"><thead><tr><th>Base</th><th>Produto</th><th class="r">Acelen hoje (c/ trib.)</th><th>Tendência</th><th class="r">Faixa estimada (R$/L)</th><th class="r">Preço provável</th></tr></thead><tbody></tbody></table></div>
+    <div class="section-h"><h2>Placar de acerto</h2><span class="hint" id="tdPlacarResumo"></span></div>
+    <div class="card tablewrap"><table id="tdPlacar"><thead><tr><th>Reajuste</th><th>Gasolina A</th><th>Diesel S10</th><th>Diesel S500</th><th>Resultado</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint" style="margin-top:10px">Como é calculado: a Acelen segue a paridade de importação, ou seja, o custo de trazer o produto dos EUA (cotações de gasolina e diesel em Nova York, Brent), convertido pelo dólar, mais frete. A leitura compara a média da semana corrente com a semana que formou o último preço e soma a defasagem Acelen × PPI. Mostra a direção provável, não o valor exato. Subvenções do governo e decisões comerciais da Acelen podem desviar o resultado.</p>
+  </section>
+
+  <!-- VARIACAO -->
+  <section id="tab-variacao" class="hide">
+    <div class="chips" style="align-items:flex-end">
+      <div class="seg" id="vForn"><button data-f="acelen" aria-pressed="true">Acelen</button><button data-f="petrobras" aria-pressed="false">Petrobras</button></div>
+      <label class="f" style="flex-direction:row;align-items:center;gap:6px">Base <select id="vBase"></select></label>
+      <label class="f" style="flex-direction:row;align-items:center;gap:6px">Produto <select id="vProd"><option value="todos">Todos</option><option value="GAA">Gasolina A</option><option value="S10">Diesel S10</option><option value="S500">Diesel S500</option></select></label>
+    </div>
+    <div class="kpis" id="vKpis"></div>
+    <div class="section-h"><h2>Último reajuste por base</h2><span class="hint" id="vMixHint"></span></div>
+    <div class="card tablewrap"><table id="vLast"><thead><tr><th>Base</th><th>Produto</th><th>Vigência</th><th class="r">Antes</th><th class="r">Agora</th><th class="r">Variação</th><th class="r">%</th><th class="r">Peso no produto final</th></tr></thead><tbody></tbody></table></div>
+    <div class="section-h"><h2>Histórico de reajustes</h2><span class="hint">Cada linha é um reajuste em relação ao lançamento anterior</span></div>
+    <div class="card tablewrap"><table id="vHist"><thead><tr><th>Vigência</th><th>Base</th><th>Produto</th><th class="r">Variação (R$/L)</th><th class="r">%</th><th class="r">Peso no produto final</th><th></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint" style="margin-top:8px">Variação calculada sobre o preço do produto sem tributos. Peso no produto final = variação × participação na mistura (Gasolina C e Diesel B). A mistura pode ser ajustada em "Tributos e bases".</p>
   </section>
 
   <!-- PPI -->
@@ -225,11 +293,18 @@ input.val{width:110px;text-align:right}
 
   <!-- CONFIG -->
   <section id="tab-config" class="hide">
-    <div class="section-h"><h2>Tributos por produto (R$/L)</h2><span class="hint">Tributos em vigor. Lançamentos antigos guardam os tributos da época.</span></div>
+    <div class="section-h"><h2>Tributos por produto (R$/L)</h2><span class="hint">Usados nos próximos lançamentos. Lançamentos antigos guardam os tributos da época.</span></div>
     <div class="card tablewrap">
       <table id="taxTable"><thead><tr><th>Produto</th><th class="r">PIS/COFINS</th><th class="r">CIDE</th><th class="r">ICMS</th></tr></thead><tbody></tbody></table>
       <div style="padding:12px;display:flex;justify-content:flex-end"><button class="btn primary" id="taxSave">Salvar tributos</button></div>
     </div>
+    <div class="section-h"><h2>Mistura do produto final</h2><span class="hint">Participação do produto A no que a Larco vende. Usada na aba Variação produto final.</span></div>
+    <div class="card"><div class="form-grid" style="align-items:end">
+      <label class="f">Gasolina A na Gasolina C (%) <input type="text" inputmode="decimal" class="num mix-in" data-p="GAA"></label>
+      <label class="f">Diesel A no Diesel B · S10 (%) <input type="text" inputmode="decimal" class="num mix-in" data-p="S10"></label>
+      <label class="f">Diesel A no Diesel B · S500 (%) <input type="text" inputmode="decimal" class="num mix-in" data-p="S500"></label>
+      <label class="f" style="justify-content:flex-end"><button class="btn primary" id="mixSave">Salvar mistura</button></label>
+    </div></div>
     <div class="section-h"><h2>Bases acompanhadas</h2><span class="hint">Local e modalidade usados para ler o site da Acelen</span></div>
     <div class="card tablewrap">
       <table id="itemTable"><thead><tr><th>Fornecedor</th><th>Base</th><th>Produto</th><th>Local no site</th><th>Modalidade</th><th class="r">Outros (R$/L)</th></tr></thead><tbody></tbody></table>
@@ -463,7 +538,7 @@ $('#ofAdd').addEventListener('click',async()=>{
 function renderConfig(){
   const T=state.config&&state.config.tributos||{};
   const tb=$('#taxTable tbody');tb.replaceChildren();
-  for(const p of PRODS){const t=T[p]||{};tb.append(el('tr',{},el('td',{},PNAME[p]),...['pis','cide','icms'].map(k=>el('td',{class:'r'},el('span',{class:'num'},f4(+t[k]||0))))));}
+  for(const p of PRODS){const t=T[p]||{};tb.append(el('tr',{},el('td',{},PNAME[p]),...['pis','cide','icms'].map(k=>el('td',{class:'r'},el('input',{class:'val num',inputmode:'decimal','data-p':p,'data-k':k,value:f4(+t[k]||0)})))));}
   const it=$('#itemTable tbody');it.replaceChildren();
   for(const i of (state.config&&state.config.itens||[])){it.append(el('tr',{},el('td',{},el('span',{class:'tag'},el('span',{class:'dot',style:'background:'+FCOLOR[i.fornecedor]}),FNAME[i.fornecedor])),el('td',{},baseLabel(i.base)),el('td',{},PNAME[i.produto]),el('td',{class:'muted'},i.local||'—'),el('td',{class:'muted'},i.modalidade||'—'),el('td',{class:'r num'},f4(+i.outros||0))));}
 }
@@ -528,7 +603,7 @@ function initPPI(force){
   if(!state.ppiSim||force){state.ppiSim={};for(const p of PRODS)state.ppiSim[p]=L[p]?L[p].total:null;
     document.querySelectorAll('.ppi-in').forEach(i=>{const v=state.ppiSim[i.dataset.p];i.value=v==null?'':f4(v);});}
   const ds=PRODS.filter(p=>L[p]).map(p=>PNAME[p]+' '+dBR(L[p].data));
-  $('#ppiInfo').textContent=ds.length?'Último PPI lançado: '+ds.join(' · ')+'. Altere os campos para simular cenários (não fica salvo).':'Nenhum PPI lançado ainda.';
+  $('#ppiInfo').textContent=ds.length?'Último PPI lançado: '+ds.join(' · ')+'. Alterar os campos só simula; "Salvar" grava como PPI de hoje.':'Nenhum PPI lançado ainda.';
 }
 function renderPPI(){
   const tb=$('#ppiTable tbody');tb.replaceChildren();let n=0;
@@ -564,10 +639,136 @@ $('#ppiSave').addEventListener('click',async()=>{
   btn.disabled=false;
 });
 
+/* ---------- variação produto final ---------- */
+const FINAL={GAA:'Gasolina C',S10:'Diesel B S10',S500:'Diesel B S500'};
+const MIXDEF={GAA:68,S10:85,S500:85};
+state.vForn='acelen';state.tend=[];state.tdProd='todos';
+function mixOf(p){const m=state.config&&state.config.mistura;const v=m&&m[p];return (v!=null&&!isNaN(+v)?+v:MIXDEF[p])/100;}
+const pct=v=>v==null||isNaN(v)?'—':(v>0?'+':v<0?'−':'')+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const brl=v=>v==null||isNaN(v)?'—':(v>0?'+':v<0?'−':'')+'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4});
+function changes(f,key){
+  const out=[];let prev=null;
+  for(const s of snapsOf(f)){const it=s.itens&&s.itens[key];if(!it||!(+it.valor>0))continue;const v=+it.valor;
+    if(prev&&Math.abs(v-prev.v)>=0.00005)out.push({data:s.data,de:prev.v,para:v,dataAnt:prev.d,d:v-prev.v,p:(v-prev.v)/prev.v*100});
+    prev={v,d:s.data};}
+  return out;
+}
+function vKeys(){
+  const f=state.vForn,b=$('#vBase').value,pf=$('#vProd').value;
+  return itemsCfg(f).filter(i=>(b==='todas'||i.base===b)&&(pf==='todos'||i.produto===pf)).map(i=>({base:i.base,produto:i.produto,key:i.base+'|'+i.produto}));
+}
+function renderVariacao(){
+  if(!state.config)return;
+  for(const b of document.querySelectorAll('#vForn button'))b.setAttribute('aria-pressed',String(b.dataset.f===state.vForn));
+  const vb=$('#vBase');const cur=vb.value;const bs=[...new Set(itemsCfg(state.vForn).map(i=>i.base))];
+  vb.replaceChildren(el('option',{value:'todas'},'Todas'),...bs.map(b=>el('option',{value:b},baseLabel(b))));vb.value=bs.includes(cur)?cur:'todas';
+  $('#vMixHint').textContent=`Mistura: Gasolina C com ${Math.round(mixOf('GAA')*100)}% de Gasolina A · Diesel B com ${Math.round(mixOf('S10')*100)}% de Diesel A`;
+  const keys=vKeys();
+  // KPIs: último reajuste por produto (média das bases filtradas)
+  const k=$('#vKpis');k.replaceChildren();
+  for(const p of PRODS){
+    const ks=keys.filter(x=>x.produto===p);if(!ks.length)continue;
+    const lasts=ks.map(x=>changes(state.vForn,x.key).slice(-1)[0]).filter(Boolean);
+    if(!lasts.length){k.append(el('div',{class:'card kpi'},el('div',{class:'lab'},PNAME[p]+' · último reajuste'),el('div',{class:'big num'},'—'),el('div',{class:'note'},'sem reajuste registrado')));continue;}
+    const ld=lasts.map(x=>x.data).sort().slice(-1)[0];const L=lasts.filter(x=>x.data===ld);
+    const d=L.reduce((a,x)=>a+x.d,0)/L.length,pc=L.reduce((a,x)=>a+x.p,0)/L.length;
+    k.append(el('div',{class:'card kpi'},
+      el('div',{class:'lab'},PNAME[p]+' · '+FNAME[state.vForn]+' · último reajuste'),
+      el('div',{class:'big num '+(d>0?'delta-up':'delta-down'),style:'color:'+(d>0?'var(--bad)':'var(--good)')},brl(d)+'/L'),
+      el('div',{class:'note'},el('b',{},pct(pc)),' no produto · vigência ',dBR(ld),L.length>1?` · média de ${L.length} bases`:''),
+      el('div',{class:'note',style:'margin-top:6px'},FINAL[p]+': ',el('b',{class:'num'},brl(d*mixOf(p))+'/L'),` (${Math.round(mixOf(p)*100)}% da mistura)`)));
+  }
+  // último reajuste por base
+  const tb=$('#vLast tbody');tb.replaceChildren();let n=0;
+  for(const x of keys){const c=changes(state.vForn,x.key).slice(-1)[0];if(!c)continue;n++;
+    tb.append(el('tr',{},el('td',{},baseLabel(x.base)),el('td',{},PNAME[x.produto]),el('td',{class:'num'},dBR(c.data)),el('td',{class:'r num muted'},f4(c.de)),el('td',{class:'r num'},f4(c.para)),
+      el('td',{class:'r'},el('span',{class:'num '+(c.d>0?'delta-up':'delta-down')},(c.d>0?'▲ ':'▼ ')+brl(c.d))),
+      el('td',{class:'r'},el('span',{class:'num '+(c.d>0?'delta-up':'delta-down')},pct(c.p))),
+      el('td',{class:'r'},el('span',{class:'num'},brl(c.d*mixOf(x.produto))),el('div',{class:'hint'},FINAL[x.produto]))));}
+  if(!n)tb.append(el('tr',{},el('td',{colspan:8,class:'empty'},'Nenhum reajuste registrado para esse filtro.')));
+  // histórico
+  const hb=$('#vHist tbody');hb.replaceChildren();
+  const all=[];for(const x of keys)for(const c of changes(state.vForn,x.key))all.push(Object.assign({base:x.base,produto:x.produto},c));
+  all.sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:(a.base+a.produto).localeCompare(b.base+b.produto));
+  const mx=Math.max(0.01,...all.map(a=>Math.abs(a.d*mixOf(a.produto))));
+  if(!all.length)hb.append(el('tr',{},el('td',{colspan:7,class:'empty'},'Sem histórico de reajustes.')));
+  for(const a of all){const im=a.d*mixOf(a.produto);const w=Math.min(50,Math.abs(im)/mx*50);
+    hb.append(el('tr',{},el('td',{class:'num'},dBR(a.data)),el('td',{},baseLabel(a.base)),el('td',{},PNAME[a.produto]),
+      el('td',{class:'r'},el('span',{class:'num '+(a.d>0?'delta-up':'delta-down')},brl(a.d))),
+      el('td',{class:'r'},el('span',{class:'num '+(a.d>0?'delta-up':'delta-down')},pct(a.p))),
+      el('td',{class:'r num'},brl(im)),
+      el('td',{},el('span',{class:'bar'},el('i',{style:`width:${w}%;${im>0?'left:50%':'right:50%'};background:${im>0?'var(--bad)':'var(--good)'}`})))));}
+}
+document.querySelectorAll('#vForn button').forEach(b=>b.addEventListener('click',()=>{state.vForn=b.dataset.f;renderVariacao();}));
+$('#vBase').addEventListener('change',renderVariacao);$('#vProd').addEventListener('change',renderVariacao);
+function fillMix(){document.querySelectorAll('.mix-in').forEach(i=>{if(document.activeElement!==i)i.value=String(Math.round(mixOf(i.dataset.p)*1000)/10).replace('.',',');});}
+$('#mixSave').addEventListener('click',async()=>{
+  const m={};for(const i of document.querySelectorAll('.mix-in')){const v=parseFloat(String(i.value).replace(',','.'));if(isNaN(v)||v<=0||v>100){toast('Percentual inválido');return;}m[i.dataset.p]=v;}
+  try{await state.db.doc('config/geral').update({mistura:m});toast('Mistura salva');}catch(e){toast('Não foi possível salvar');}
+});
+
+/* ---------- tendência acelen ---------- */
+const DIRW={alta:'Tendência de alta',queda:'Tendência de queda',estavel:'Tendência estável'};
+const DIRA={alta:'↑',queda:'↓',estavel:'→'};
+const DIRC={alta:'up',queda:'down',estavel:'flat'};
+const FORW=['','fraca','moderada','forte'];
+function avgAcelen(p){const xs=itemsCfg('acelen').filter(i=>i.produto===p).map(i=>lastTwo('acelen',i.base+'|'+p).cur).filter(Boolean);return xs.length?xs.reduce((a,x)=>a+(+x.item.valor),0)/xs.length:null;}
+function forceEl(n){return el('span',{class:'force'},...[1,2,3].map(i=>el('i',{class:i<=n?'on':''})),' ',FORW[n]||'');}
+function renderTendencia(){
+  const T=[...state.tend].sort((a,b)=>a.data<b.data?-1:1);const L=T[T.length-1];
+  const cards=$('#tdCards');cards.replaceChildren();
+  const dtb=$('#tdDrivers tbody');dtb.replaceChildren();
+  if(!L){cards.append(el('div',{class:'card empty'},'Ainda não há leitura de tendência. A primeira é gerada pelo Claude e depois atualizada toda quarta à tarde.'));$('#tdNota').classList.add('hide');return;}
+  $('#tdNota').classList.remove('hide');
+  const g=L.geradoEm?new Date(L.geradoEm):null;
+  $('#tdStatus').textContent=`Leitura de ${dBR(L.data)}${g?' às '+g.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${L.parcial?' · parcial ('+L.parcial+')':''} · próximo reajuste esperado ${dBR(L.proxReajuste)}`;
+  for(const p of PRODS){const t=L.produtos&&L.produtos[p];if(!t)continue;
+    const a=avgAcelen(p);const fp=t.faixaPct||[0,0];
+    const rng=a!=null&&t.dir!=='estavel'?`≈ ${brl(a*fp[0]/100)} a ${brl(a*fp[1]/100)}/L (${pct(fp[0])} a ${pct(fp[1])})`:t.dir==='estavel'?'Variação esperada pequena (até ±1%)':'';
+    cards.append(el('div',{class:'card trend'},
+      el('div',{class:'lab'},PNAME[p]),
+      el('div',{class:'dir'},el('span',{class:'arrow '+DIRC[t.dir]},DIRA[t.dir]),el('div',{},el('div',{class:'word'},DIRW[t.dir]),forceEl(t.forca||1))),
+      el('div',{class:'range'},rng),
+      t.motivo?el('div',{class:'range',style:'color:var(--text-3)'},t.motivo):null));
+  }
+  $('#tdJanela').textContent=L.janela?`Média ${L.janela.anterior} × ${L.janela.atual}`:'';
+  for(const d of (L.indicadores||[])){
+    const dec=d.dec!=null?d.dec:2;const fmt=v=>v==null?null:(+v).toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const fu=v=>{const x=fmt(v);return x==null?'—':x+(d.un?(d.un==='%'?'%':' '+d.un):'');};
+    const e=d.efeito||'flat';
+    dtb.append(el('tr',{},el('td',{},el('b',{},d.nome),d.obs?el('div',{class:'hint'},d.obs):null),el('td',{class:'r num muted'},fu(d.ant)),el('td',{class:'r num'},fu(d.atu)),
+      el('td',{class:'r'},el('span',{class:'num '+(e==='up'?'delta-up':e==='down'?'delta-down':'muted')},d.varPct!=null?pct(d.varPct):'—')),
+      el('td',{},el('span',{class:'eff '+e},(e==='up'?'↑ pressiona alta':e==='down'?'↓ pressiona queda':'→ neutro')+(d.afeta?' · '+d.afeta:'')))));
+  }
+  const nota=$('#tdNota');nota.replaceChildren(el('b',{},'Leitura: '),L.comentario||'');
+  // por base
+  const ch=$('#tdProdChips');ch.replaceChildren();
+  for(const p of ['todos',...PRODS])ch.append(el('button',{class:'chip','aria-pressed':String(state.tdProd===p),onclick:()=>{state.tdProd=p;renderTendencia();}},p==='todos'?'Todos':PNAME[p]));
+  const bt=$('#tdBases tbody');bt.replaceChildren();
+  for(const i of itemsCfg('acelen')){if(state.tdProd!=='todos'&&i.produto!==state.tdProd)continue;const t=L.produtos&&L.produtos[i.produto];if(!t)continue;
+    const c=lastTwo('acelen',i.base+'|'+i.produto).cur;if(!c)continue;const fp=t.faixaPct||[0,0];const v=+c.item.valor;
+    const lo=v*fp[0]/100,hi=v*fp[1]/100;
+    bt.append(el('tr',{},el('td',{},baseLabel(i.base)),el('td',{},PNAME[i.produto]),el('td',{class:'r num'},f4(c.total)),
+      el('td',{},el('span',{class:'eff '+DIRC[t.dir]},DIRA[t.dir]+' '+(t.dir==='estavel'?'estável':t.dir))),
+      el('td',{class:'r num'},t.dir==='estavel'?'±0,0000':brl(lo)+' a '+brl(hi)),
+      el('td',{class:'r num'},t.dir==='estavel'?f4(c.total):f4(c.total+lo)+' – '+f4(c.total+hi))));}
+  // placar
+  const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0;
+  const av=T.filter(x=>x.avaliacao).sort((a,b)=>a.data<b.data?1:-1);
+  const cell=(x,p)=>{const a=x.avaliacao,pr=a.previsto&&a.previsto[p],re=a.real&&a.real[p];if(!pr)return el('td',{class:'muted'},'—');
+    const hit=a.acerto&&a.acerto[p];if(hit!=null){tot++;if(hit)ok++;}
+    return el('td',{},el('span',{class:'eff '+DIRC[pr]},'Previsto '+DIRA[pr]),' ',el('span',{class:'muted'},'· real '),re!=null?el('span',{class:'num '+(re>0?'delta-up':re<0?'delta-down':'muted')},brl(re)):'—',' ',hit==null?null:el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertou':'errou'));};
+  for(const x of av){const a=x.avaliacao;
+    pt.append(el('tr',{},el('td',{class:'num'},dBR(a.reajuste),a.reconstituido?el('div',{class:'hint'},'reconstituído'):null),cell(x,'GAA'),cell(x,'S10'),cell(x,'S500'),
+      el('td',{style:'white-space:normal;min-width:220px'},a.nota?el('span',{class:'hint'},a.nota):'')));}
+  const pend=T.filter(x=>!x.avaliacao);if(pend.length)pt.prepend(el('tr',{},el('td',{class:'num'},dBR(L.proxReajuste)),...PRODS.map(p=>{const t=L.produtos&&L.produtos[p];return el('td',{},t?el('span',{class:'eff '+DIRC[t.dir]},'Previsto '+DIRA[t.dir]):'—');}),el('td',{},el('span',{class:'okbadge p'},'aguardando reajuste'))));
+  if(!av.length&&!pend.length)pt.append(el('tr',{},el('td',{colspan:5,class:'empty'},'Sem histórico ainda.')));
+  $('#tdPlacarResumo').textContent=tot?`Acertou a direção em ${ok} de ${tot} previsões (${Math.round(ok/tot*100)}%)`:'O placar começa a contar a partir do próximo reajuste';
+}
+
 /* ---------- tabs ---------- */
 function showTab(t){
   for(const b of document.querySelectorAll('nav.tabs button'))b.setAttribute('aria-selected',String(b.dataset.tab===t));
-  for(const s of ['painel','ppi','historico','ofertas','config'])$('#tab-'+s).classList.toggle('hide',s!==t);
+  for(const s of ['painel','tendencia','variacao','ppi','historico','ofertas','config'])$('#tab-'+s).classList.toggle('hide',s!==t);
   if(t==='historico')renderChart();
   try{history.replaceState(null,'','#'+t);}catch(e){}
 }
@@ -578,30 +779,19 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 
 function renderAll(){
   if(!state.config)return;
-  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderOfertas();renderConfig();
+  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderOfertas();renderConfig();renderVariacao();renderTendencia();fillMix();
   if($('#ov').classList.contains('open'))checkExisting();
 }
 
 /* ---------- boot ---------- */
 async function boot(){
-  const h=(location.hash||'').slice(1);if(['painel','ppi','historico','ofertas','config'].includes(h))showTab(h);
+  const h=(location.hash||'').slice(1);if(['painel','tendencia','variacao','ppi','historico','ofertas','config'].includes(h))showTab(h);
   const D=window.__DADOS;if(!D){msg('bad','Não foi possível carregar os dados do painel.');return;}
   state.canWrite=false;
-  ['#btnLancar','#ofForm','#taxSave','#ppiSave'].forEach(q=>$(q).classList.add('hide'));
-  state.config=D.config;state.snaps=D.precos;state.ofertas=D.ofertas;
+  ['#btnLancar','#ofForm','#taxSave','#ppiSave','#mixSave'].forEach(q=>$(q).classList.add('hide'));
+  state.config=D.config;state.snaps=D.precos;state.ofertas=D.ofertas;state.tend=D.tendencia||[];
   const g=new Date(D.geradoEm);$('#geradoEm').textContent='Atualizado em '+g.toLocaleDateString('pt-BR')+' às '+g.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  renderAll();return;
-  let db=null;
-  if(!db){msg('bad','Não foi possível acessar os dados deste painel nesta visualização. Abra o painel pelo link do Claude, com sua conta conectada.');return;}
-  state.db=db;
-  try{const u=await window.claude.use('user');if(u&&u.can){const c=await u.can('data.write');if(c===false)state.canWrite=false;}}catch(e){}
-  if(!state.canWrite){$('#ppiSave').classList.add('hide');$('#btnLancar').classList.add('hide');$('#ofForm').classList.add('hide');$('#taxSave').classList.add('hide');}
-  const timer=setTimeout(()=>{if(!state.loaded.c||!state.loaded.p)msg('warn','Os dados estão demorando para chegar. Verifique a conexão; o painel atualiza sozinho quando responderem.');},10000);
-  const done=()=>{if(state.loaded.c&&state.loaded.p){clearTimeout(timer);if(!state.config){msg('warn','Painel ainda sem configuração de bases.');}else msg('','');renderAll();}};
-  const err=e=>{clearTimeout(timer);msg('bad','Erro ao ler os dados ('+(e&&e.code||'desconhecido')+').');};
-  db.doc('config/geral').onSnapshot(s=>{state.config=s.exists?s.data():null;if(!s.metadata.fromCache)state.loaded.c=true;else state.loaded.c=state.loaded.c||!!state.config;done();},err);
-  db.collection('precos').onSnapshot(q=>{state.snaps=q.docs.map(d=>Object.assign({id:d.id},d.data()));if(!q.metadata.fromCache||q.size)state.loaded.p=true;done();},err);
-  db.collection('ofertas').onSnapshot(q=>{state.ofertas=q.docs.map(d=>Object.assign({id:d.id},d.data()));state.loaded.o=true;if(state.config)renderOfertas();},err);
+  renderAll();
 }
 boot();
 })();
