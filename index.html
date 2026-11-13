@@ -175,7 +175,6 @@ input.val{width:110px;text-align:right}
     <button role="tab" data-tab="variacao" aria-selected="false">Variação produto final</button>
     <button role="tab" data-tab="ppi" aria-selected="false">Simulador PPI</button>
     <button role="tab" data-tab="historico" aria-selected="false">Histórico</button>
-    <button role="tab" data-tab="ofertas" aria-selected="false">Ofertas</button>
     <button role="tab" data-tab="config" aria-selected="false">Tributos e bases</button>
   </nav>
 
@@ -274,24 +273,7 @@ input.val{width:110px;text-align:right}
     </div>
   </section>
 
-  <!-- OFERTAS -->
-  <section id="tab-ofertas" class="hide">
-    <div class="card">
-      <div class="form-grid" id="ofForm">
-        <label class="f">Data <input type="date" id="ofData"></label>
-        <label class="f">Fornecedor <input type="text" id="ofForn" placeholder="ex.: Nimofast"></label>
-        <label class="f">Base <select id="ofBase"></select></label>
-        <label class="f">Produto <select id="ofProd"><option>GAA</option><option>S10</option><option>S500</option></select></label>
-        <label class="f">Preço c/ tributos (R$/L) <input type="text" inputmode="decimal" id="ofPreco" placeholder="6,8000"></label>
-        <label class="f" style="justify-content:flex-end"><button class="btn primary" id="ofAdd">Adicionar oferta</button></label>
-      </div>
-    </div>
-    <div class="section-h"><h2>Ofertas x preço de refinaria</h2><span class="hint">Compara com o último preço PB e Acelen da mesma base e produto</span></div>
-    <div class="card tablewrap">
-      <table id="ofTable"><thead><tr><th>Data</th><th>Fornecedor</th><th>Base</th><th>Produto</th><th class="r">Oferta</th><th class="r">PB</th><th class="r">Oferta − PB</th><th class="r">Acelen</th><th class="r">Oferta − Acelen</th><th></th></tr></thead><tbody></tbody></table>
-    </div>
-  </section>
-
+  
   <!-- CONFIG -->
   <section id="tab-config" class="hide">
     <div class="section-h"><h2>Tributos por produto (R$/L)</h2><span class="hint">Usados nos próximos lançamentos. Lançamentos antigos guardam os tributos da época.</span></div>
@@ -509,30 +491,6 @@ function renderLanc(){
     tb.append(el('tr',{},el('td',{class:'num'},dBR(x.data)),el('td',{},el('span',{class:'tag'},el('span',{class:'dot',style:'background:'+FCOLOR[x.fornecedor]}),FNAME[x.fornecedor]||x.fornecedor)),el('td',{class:'muted'},origemLabel(x.origem)),el('td',{class:'r num'},Object.keys(x.itens||{}).length),el('td',{class:'r'},state.canWrite?del:null)));
   }
 }
-
-/* ---------- ofertas ---------- */
-function renderOfertas(){
-  const ob=$('#ofBase');if(!ob.options.length||ob.dataset.n!==String(bases().length)){ob.replaceChildren(...bases().filter(b=>b!=='PPI').map(b=>el('option',{value:b},baseLabel(b))));ob.dataset.n=String(bases().length);}
-  if(!$('#ofData').value)$('#ofData').value=today();
-  const tb=$('#ofTable tbody');tb.replaceChildren();
-  const list=[...state.ofertas].sort((a,b)=>a.data<b.data?1:-1);
-  if(!list.length)tb.append(el('tr',{},el('td',{colspan:10,class:'empty'},'Nenhuma oferta lançada.')));
-  for(const o of list){
-    const key=o.base+'|'+o.produto;const P=lastTwo('petrobras',key).cur,A=lastTwo('acelen',key).cur;
-    const d=(ref)=>{if(!ref)return el('td',{class:'r muted'},'—');const v=o.preco-ref.total;return el('td',{class:'r'},el('span',{class:'num '+(v>0?'delta-up':'delta-down')},sgn(v)));};
-    const del=el('button',{class:'btn ghost sm',onclick:async(e)=>{const btn=e.currentTarget;if(btn.dataset.confirm!=='1'){btn.dataset.confirm='1';btn.textContent='Confirmar';setTimeout(()=>{btn.dataset.confirm='';btn.textContent='Excluir';},3500);return;}try{btn.disabled=true;await state.db.doc('ofertas/'+o.id).delete();}catch(err){btn.disabled=false;toast('Não foi possível excluir');}}},'Excluir');
-    tb.append(el('tr',{},el('td',{class:'num'},dBR(o.data)),el('td',{},o.fornecedor),el('td',{},baseLabel(o.base)),el('td',{},PNAME[o.produto]||o.produto),el('td',{class:'r num'},f4(o.preco)),el('td',{class:'r num'},P?f4(P.total):'—'),d(P),el('td',{class:'r num'},A?f4(A.total):'—'),d(A),el('td',{class:'r'},state.canWrite?del:null)));
-  }
-}
-$('#ofAdd').addEventListener('click',async()=>{
-  const v=parseNum($('#ofPreco').value);const forn=$('#ofForn').value.trim();
-  if(!forn||isNaN(v)){toast('Preencha fornecedor e preço');return;}
-  if(!state.db)return;
-  const btn=$('#ofAdd');btn.disabled=true;
-  try{await state.db.collection('ofertas').add({data:$('#ofData').value||today(),fornecedor:forn.slice(0,60),base:$('#ofBase').value,produto:$('#ofProd').value,preco:v,criadoEm:new Date().toISOString()});$('#ofPreco').value='';toast('Oferta adicionada');}
-  catch(e){toast(e&&e.code==='invalid_argument'?'Sem permissão para salvar':'Não foi possível salvar');}
-  btn.disabled=false;
-});
 
 /* ---------- config ---------- */
 function renderConfig(){
@@ -767,7 +725,7 @@ function renderTendencia(){
 /* ---------- tabs ---------- */
 function showTab(t){
   for(const b of document.querySelectorAll('nav.tabs button'))b.setAttribute('aria-selected',String(b.dataset.tab===t));
-  for(const s of ['painel','tendencia','variacao','ppi','historico','ofertas','config'])$('#tab-'+s).classList.toggle('hide',s!==t);
+  for(const s of ['painel','tendencia','variacao','ppi','historico','config'])$('#tab-'+s).classList.toggle('hide',s!==t);
   if(t==='historico')renderChart();
   try{history.replaceState(null,'','#'+t);}catch(e){}
 }
@@ -778,16 +736,16 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 
 function renderAll(){
   if(!state.config)return;
-  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderOfertas();renderConfig();renderVariacao();renderTendencia();fillMix();
+  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderConfig();renderVariacao();renderTendencia();fillMix();
   if($('#ov').classList.contains('open'))checkExisting();
 }
 
 /* ---------- boot ---------- */
 async function boot(){
-  const h=(location.hash||'').slice(1);if(['painel','tendencia','variacao','ppi','historico','ofertas','config'].includes(h))showTab(h);
+  const h=(location.hash||'').slice(1);if(['painel','tendencia','variacao','ppi','historico','config'].includes(h))showTab(h);
   const D=window.__DADOS;if(!D){msg('bad','Não foi possível carregar os dados do painel.');return;}
   state.canWrite=false;
-  ['#btnLancar','#ofForm','#taxSave','#mixSave'].forEach(q=>$(q).classList.add('hide'));
+  ['#btnLancar','#taxSave','#mixSave'].forEach(q=>$(q).classList.add('hide'));
   state.config=D.config;state.snaps=D.precos;state.ofertas=D.ofertas;state.tend=D.tendencia||[];
   const g=new Date(D.geradoEm);$('#geradoEm').textContent='Atualizado em '+g.toLocaleDateString('pt-BR')+' às '+g.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   renderAll();
