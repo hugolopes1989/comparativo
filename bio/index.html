@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel Bio · Etanol e B100</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: painel de trabalho da Larco, irmão do Comparativo Acelen × PB
+   IDEA: boletim de mercado de biocombustíveis da mesa de compras
+   PICTURE: gráfico do histórico ESALQ e termômetro de tendência
+   COLOUR and TYPE: azul Larco #001B86, laranja #F7941D; Nunito Sans + JetBrains Mono
+   LAYOUT: cabeçalho de marca, abas, cartões de indicador, tabelas */
+:root{
+  color-scheme:light;
+  --bg:#f4f3ef; --surface:#fcfcfb; --surface-2:#f0efea; --line:#e2e0d8; --line-2:#cfccc2;
+  --text:#121211; --text-2:#52514e; --text-3:#85837c;
+  --brand:#001B86; --orange:#F7941D; --orange-2:#EE6A2A; --brand-text:#001B86;
+  --hid:#2f9be0; --ani:#6250d6; --al:#13834a; --pb:#c2410c; --pe:#db2777; --mt:#0d9488; --b100:#a16207; --cost:#85837c;
+  --good:#0f7b3f; --good-bg:#e3f3e8; --warn:#9a6200; --warn-bg:#fdf1d6; --bad:#b42318; --bad-bg:#fde8e6;
+  --accent:#001B86; --accent-text:#fff; --radius:12px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){color-scheme:dark;--bg:#121211;--surface:#1a1a19;--surface-2:#232321;--line:#2e2e2b;--line-2:#3c3c38;--text:#f0efec;--text-2:#c3c2b7;--text-3:#8d8c84;--brand:#0a2496;--brand-text:#9fb4ff;--hid:#5cb6ee;--ani:#9085e9;--al:#3fbf73;--pb:#fb923c;--pe:#f472b6;--mt:#2dd4bf;--pe:#f472b6;--mt:#2dd4bf;--b100:#eab308;--good:#5fd08f;--good-bg:#183526;--warn:#f0b54a;--warn-bg:#3a2c0d;--bad:#ff8a80;--bad-bg:#3d1b18;--accent:#9fb4ff;--accent-text:#0b1033;--shadow:none}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#121211;--surface:#1a1a19;--surface-2:#232321;--line:#2e2e2b;--line-2:#3c3c38;--text:#f0efec;--text-2:#c3c2b7;--text-3:#8d8c84;--brand:#0a2496;--brand-text:#9fb4ff;--hid:#5cb6ee;--ani:#9085e9;--al:#3fbf73;--pb:#fb923c;--pe:#f472b6;--mt:#2dd4bf;--pe:#f472b6;--mt:#2dd4bf;--b100:#eab308;--good:#5fd08f;--good-bg:#183526;--warn:#f0b54a;--warn-bg:#3a2c0d;--bad:#ff8a80;--bad-bg:#3d1b18;--accent:#9fb4ff;--accent-text:#0b1033;--shadow:none}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Nunito Sans",system-ui,sans-serif;font-size:14px;line-height:1.45;overflow-x:clip}
+.num{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:16px;background:var(--brand);color:#fff;border-radius:16px;padding:18px 22px;position:relative;overflow:hidden}
+header.top>*{position:relative;z-index:1}
+header.top .deco{position:absolute;inset:0;z-index:0;pointer-events:none}
+.brandrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brandrow img{height:38px;width:auto;display:block}
+.brandsep{width:1px;height:34px;background:rgba(255,255,255,.35)}
+h1{font-size:22px;font-weight:800;margin:0;color:#fff}
+.sub{color:rgba(255,255,255,.82);margin-top:4px;font-size:13px}
+.status{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:4px 10px;font-size:12px;color:rgba(255,255,255,.85)}
+.pill b{color:#fff}
+.pill.warn{background:var(--orange);border-color:var(--orange);color:#fff}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+nav.tabs button{flex:none;font:inherit;cursor:pointer;border:0;background:none;padding:10px 12px;color:var(--text-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;min-height:44px}
+nav.tabs button[aria-selected="true"]{color:var(--brand-text);border-bottom-color:var(--orange);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));gap:12px;margin-bottom:16px}
+.kpi{padding:14px 16px;box-shadow:inset 0 3px 0 var(--orange),var(--shadow)}
+.kpi .lab{font-size:12px;color:var(--text-2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.kpi .big{font-size:clamp(20px,5vw,26px);font-weight:700;margin:6px 0 2px;color:var(--brand-text)}
+.kpi .note{font-size:12px;color:var(--text-2)}
+.section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 10px}
+.section-h h2{font-size:15px;font-weight:700;margin:0;padding-left:10px;border-left:3px solid var(--orange)}
+.hint{font-size:12px;color:var(--text-3)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{font:inherit;cursor:pointer;border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text-2);min-height:36px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{min-width:auto;padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600}
+td.r,th.r{text-align:right}
+td.tw{white-space:normal}td.tw>div{width:260px}
+tbody tr:last-child td{border-bottom:0}
+.up{color:var(--bad)} .down{color:var(--good)} .flat{color:var(--text-3)}
+.fig{position:relative;height:300px;padding:0}
+.fig svg{position:absolute;inset:0;width:100%;height:100%}
+.chartbox{padding:14px 14px 8px;position:relative}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin:0 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;display:inline-block;border-radius:2px}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.12);display:none;z-index:5;min-width:150px}
+.tip .row{display:flex;justify-content:space-between;gap:12px}
+.trend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:12px;margin-bottom:14px}
+.trend{padding:16px 18px}
+.trend .lab{font-size:12px;color:var(--text-2);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.trend .dir{display:flex;align-items:center;gap:10px;margin:8px 0 6px}
+.arrow{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex:none}
+.arrow.alta{background:var(--bad-bg);color:var(--bad)} .arrow.queda{background:var(--good-bg);color:var(--good)} .arrow.estavel{background:var(--surface-2);color:var(--text-2)}
+.word{font-size:20px;font-weight:800}
+.force{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--surface-2);color:var(--text-2)}
+.force i{width:6px;height:10px;border-radius:2px;background:var(--line-2);display:inline-block}
+.force i.on{background:var(--orange)}
+.trend p{margin:6px 0 0;font-size:13px;color:var(--text-2)}
+.note-box{padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.55}
+.note-box b{color:var(--text)}
+.note-box ul{margin:6px 0 0;padding-left:18px}
+.banner{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;background:var(--warn-bg);color:var(--warn)}
+.badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;background:var(--surface-2);color:var(--text-2)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)} .badge.good{background:var(--good-bg);color:var(--good)} .badge.bad{background:var(--bad-bg);color:var(--bad)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:10px;padding:14px;align-items:end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-2);font-weight:600}
+input,select{font:inherit;font-size:16px;color:var(--text);background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;min-height:44px}
+input:focus,select:focus{outline:2px solid var(--orange);outline-offset:-1px}
+.hide{display:none!important}
+a{color:var(--brand-text)}
+.filters{padding:12px 14px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.frow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.flab{font-size:12px;font-weight:700;color:var(--text-3);width:58px;flex:none}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;align-self:flex-start}
+.seg button{font:inherit;cursor:pointer;border:0;background:var(--surface);padding:9px 16px;color:var(--text-2);font-weight:600;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-text)}
+tr.pick{cursor:pointer} tr.pick:hover td{background:var(--surface-2)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle;border:1px solid var(--line-2)}
+.uf-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin:4px 0 12px}
+.uf-head h2{margin:0;font-size:20px;font-weight:800;color:var(--brand-text)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:12px}
+@media (max-width:640px){th,td{padding:8px} .brandsep{display:none} header.top{padding:16px} h1{font-size:19px} .fig{height:240px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg class="deco" viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true"><path d="M820 -10 C 930 40, 960 110, 900 175" fill="none" stroke="#F7941D" stroke-width="2"/><path d="M870 -10 C 990 50, 1010 120, 960 175" fill="none" stroke="#F7941D" stroke-opacity=".45" stroke-width="1.5"/></svg>
+    <div class="brandrow">
+      <img src="logo-larco.png" alt="Larco" onerror="this.style.display='none'">
+      <span class="brandsep"></span>
+      <div>
+        <h1>Painel Bio · Etanol e B100</h1>
+        <div class="sub">Foco: MT, BA, PE, AL, MA e TO · preços na usina (R$/L), bomba, oferta, regras e tendência · <span id="geradoEm"></span></div>
+        <div class="status" id="status"></div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="resumo" aria-selected="true">Resumo</button>
+    <button role="tab" data-tab="historico" aria-selected="false">Indicadores ESALQ</button>
+    <button role="tab" data-tab="etanol" aria-selected="false">Etanol NE × CS</button>
+    <button role="tab" data-tab="b100" aria-selected="false">B100</button>
+    <button role="tab" data-tab="tendencia" aria-selected="false">Tendência</button>
+    <button role="tab" data-tab="origem" aria-selected="false">Simulador de origem</button>
+    <button role="tab" data-tab="regras" aria-selected="false">Regras e fontes</button>
+  </nav>
+
+  <section id="tab-resumo">
+    <div id="alertas"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="section-h"><h2>Estados foco</h2><span class="hint">Usina = CEPEA sem ICMS · bomba = ANP</span></div>
+    <div class="card tablewrap"><table id="foco"><thead><tr><th>UF</th><th class="r">Usina hidratado</th><th class="r">Usina anidro</th><th class="r">Bomba etanol</th><th class="r">Gasolina</th><th class="r">Paridade</th><th class="r">Diesel S10</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint" id="focoNota"></p>
+    <div class="section-h"><h2>Tendência para as próximas semanas</h2><span class="hint" id="tdData"></span></div>
+    <div class="trend-grid" id="tdMini"></div>
+  </section>
+
+  <section id="tab-historico" class="hide">
+    <div class="filters card">
+      <div class="seg" id="eModo" role="group" aria-label="Visão"><button data-m="geral" aria-pressed="true">Painel geral</button><button data-m="estado" aria-pressed="false">Por estado</button></div>
+      <div class="frow"><span class="flab">Estado</span><div class="chips" id="eUF"></div></div>
+      <div class="frow"><span class="flab">Produto</span><div class="chips" id="eProd"></div></div>
+      <div class="frow"><span class="flab">Período</span><div class="chips" id="ePer"></div></div>
+    </div>
+    <div id="eEstadoHead"></div>
+    <div class="kpis" id="eKpis"></div>
+    <div class="card chartbox"><div class="legend" id="eLegend"></div><div class="fig" id="eFig"><svg></svg></div><div class="tip" id="tip"></div></div>
+    <p class="hint" id="eChartHint"></p>
+    <div id="eTabelas"></div>
+    <p class="hint">Indicadores CEPEA/ESALQ em R$/L, na usina. Hidratado sem ICMS (PIS/Cofins zerado desde 10/09/26); anidro sem PIS/Cofins. MT vem com ICMS incluído (marcado com *): use para ver a tendência, não compare o valor. Períodos sem publicação ficam de fora; a variação é sempre contra o período imediatamente anterior publicado da mesma série.</p>
+  </section>
+
+  <section id="tab-etanol" class="hide">
+    <div class="section-h" style="margin-top:0"><h2>Nordeste × Centro-Sul na mesma semana</h2><span class="hint" id="spreadSem"></span></div>
+    <div class="card tablewrap"><table id="spread"><thead><tr><th>Produto</th><th>Praça NE</th><th class="r">NE</th><th class="r">SP</th><th class="r">NE − SP</th><th>Leitura</th></tr></thead><tbody></tbody></table></div>
+    <div class="section-h"><h2>Bomba: etanol × gasolina</h2><span class="hint">Abaixo de 70% o hidratado ganha venda</span></div>
+    <div class="card tablewrap"><table id="bomba"><thead><tr><th>UF</th><th>Semana ANP</th><th class="r">Etanol</th><th class="r">Gasolina</th><th class="r">Paridade</th><th class="r">Diesel S10</th><th></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint" id="bombaNota"></p>
+    <div class="section-h"><h2>Oferta</h2><span class="hint" id="ofertaFonte"></span></div>
+    <div class="kpis" id="oferta"></div>
+    <div class="card note-box" id="ofertaLeitura"></div>
+  </section>
+
+  <section id="tab-b100" class="hide">
+    <div class="kpis" id="bKpis"></div>
+    <div class="card chartbox"><div class="legend"><span><i style="background:var(--b100)"></i>B100 · preço médio ANP</span><span><i style="background:var(--cost)"></i>Custo de matéria-prima (último)</span></div><div class="fig" id="bFig"><svg></svg></div></div>
+    <div class="section-h"><h2>B100 × diesel A por base</h2><span class="hint">Sem tributos · peso no Diesel B = 15% da diferença</span></div>
+    <div class="card tablewrap"><table id="bDiesel"><thead><tr><th>Base</th><th>Diesel A</th><th class="r">Diesel A</th><th class="r">B100</th><th class="r">B100 − diesel</th><th class="r">Peso no Diesel B</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint" id="bNota"></p>
+  </section>
+
+  <section id="tab-tendencia" class="hide">
+    <div class="section-h" style="margin-top:0"><h2>Para onde vão os preços</h2><span class="hint" id="tdHoriz"></span></div>
+    <div class="trend-grid" id="tdCards"></div>
+    <div class="card note-box" id="tdRiscos"></div>
+    <div class="section-h"><h2>Assertividade da previsão</h2><span class="hint">Cada leitura é conferida com o indicador da semana seguinte</span></div>
+    <div class="card tablewrap"><table id="placar"><thead><tr><th>Leitura</th><th>Produto</th><th>Previsto</th><th>Aconteceu</th><th>Resultado</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="tab-origem" class="hide">
+    <div class="section-h" style="margin-top:0"><h2>De onde comprar para a base</h2><span class="hint">Preço na usina + frete até a base. Nada é salvo.</span></div>
+    <div class="card"><div class="form-grid">
+      <label class="f">Produto <select id="oProd"><option value="hid">Hidratado</option><option value="ani">Anidro</option></select></label>
+      <label class="f">Base de destino <select id="oBase"><option>Suape (PE)</option><option>Maceió (AL)</option><option>Candeias (BA)</option><option>Juazeiro (BA)</option><option>Itaqui (MA)</option><option>Porto Nacional (TO)</option><option>Sinop (MT)</option><option>Cuiabá (MT)</option></select></label>
+    </div></div>
+    <div class="card tablewrap" style="margin-top:10px"><table id="oTable"><thead><tr><th>Origem</th><th class="r">Preço na usina</th><th class="r">Frete até a base</th><th class="r">Custo posto</th><th></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Preço AL, PE e SP vem do último CEPEA (pode editar; PE é de setembro). MT e importado: digite o preço que recebeu. Frete em R$/L. Some ICMS e prazo pela regra de preço real da Larco antes de fechar.</p>
+  </section>
+
+  <section id="tab-regras" class="hide">
+    <div class="section-h" style="margin-top:0"><h2>Regras em vigor</h2></div>
+    <div class="card tablewrap"><table id="regras"><thead><tr><th>Tema</th><th>Hoje</th><th>Detalhe</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="section-h"><h2>Fontes</h2><span class="hint">Atualizado pelo Claude a partir de fontes públicas</span></div>
+    <div class="card note-box"><ul id="fontes"></ul></div>
+  </section>
+</div>
+
+<script>document.write('<script src="dados.js?t='+Date.now()+'"><\/script>');</script>
+<script>
+{
+const D=window.__BIO;
+const ser=id=>D.esalq.find(s=>s.id===id);
+function merge(uf){const m=new Map();for(const k of ['hid','ani']){const s=ser(`${uf}-${k}-sem`);if(!s)continue;for(const p of s.pontos){const o=m.get(p.fim)||{sem:p.p,fim:p.fim,hid:null,ani:null};o[k]=p.v;m.set(p.fim,o);}}return [...m.values()].sort((a,b)=>a.fim<b.fim?-1:1);}
+D.cepeaSP=merge('SP');D.cepeaNE={AL:merge('AL'),PE:merge('PE'),PB:merge('PB'),MT:merge('MT')};
+{const pl=ser('SP-hid-dia').pontos.at(-1);D.paulinia={data:pl.fim,valor:pl.v};}
+const $=s=>document.querySelector(s);
+const f4=v=>v==null||isNaN(v)?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4});
+const f2=v=>v==null||isNaN(v)?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=v=>v==null||isNaN(v)?'—':(v>0?'+':v<0?'−':'')+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const sgn=v=>v==null||isNaN(v)?'—':(v>0?'+':v<0?'−':'')+f4(Math.abs(v));
+const cls=v=>v==null?'flat':v>0.00005?'up':v<-0.00005?'down':'flat';
+const dBR=d=>{const[y,m,dd]=d.split('-');return `${dd}/${m}/${y.slice(2)}`;};
+const lastOf=(arr,k)=>{for(let i=arr.length-1;i>=0;i--)if(arr[i][k]!=null)return{...arr[i],v:arr[i][k],i};return null;};
+const prevOf=(arr,k,i)=>{const j=i-1;return j>=0&&arr[j][k]!=null?{...arr[j],v:arr[j][k]}:null;};
+const daysTo=d=>Math.round((new Date(d+'T12:00:00')-new Date())/86400000);
+const PN={hid:'Hidratado',ani:'Anidro'};
+const PRACAS_OLD={SP:{nome:'São Paulo (ref.)',arr:D.cepeaSP,cor:'var(--hid)'},AL:{nome:'Alagoas',arr:D.cepeaNE.AL,cor:'var(--al)'},PE:{nome:'Pernambuco',arr:D.cepeaNE.PE,cor:'var(--pe)'},MT:{nome:'Mato Grosso*',arr:D.cepeaNE.MT,cor:'var(--mt)',lab:'MT*'},PB:{nome:'Paraíba',arr:D.cepeaNE.PB,cor:'var(--pb)'}};
+
+/* tabs */
+const tabs=[...document.querySelectorAll('nav.tabs button')];
+function show(t){tabs.forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));document.querySelectorAll('section[id^=tab-]').forEach(s=>s.classList.toggle('hide',s.id!=='tab-'+t));if(t==='historico')drawH();if(t==='b100')drawB();try{history.replaceState(null,'','#'+t)}catch(e){}}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+
+/* header */
+const g=new Date(D.geradoEm);$('#geradoEm').textContent='atualizado em '+g.toLocaleDateString('pt-BR')+' '+g.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const hs=lastOf(D.cepeaSP,'hid');const dz=daysTo('2026-12-09');
+$('#status').innerHTML=`<span class="pill">ESALQ SP <b>${hs.sem}</b></span><span class="pill">ANP bomba <b>${D.bomba.semana}</b></span><span class="pill">B100 ANP <b>${D.b100.serie.at(-1).sem}</b></span>`+(dz>=0?`<span class="pill warn">Desoneração do hidratado vence em <b>${dz} dias</b></span>`:'');
+
+/* resumo */
+function kpi(lab,val,note,var_,neutro){return `<div class="card kpi"><div class="lab">${lab}</div><div class="big num">${val}</div><div class="note">${var_!=null?`<span class="num ${neutro?'':cls(var_)}">${pct(var_)}</span> `:''}${note}</div></div>`;}
+function lastVar(arr,k){const l=lastOf(arr,k);if(!l)return{l:null,v:null};const p=prevOf(arr,k,l.i);return{l,v:p?(l.v/p.v-1)*100:null};}
+{
+  const a=lastVar(D.cepeaSP,'hid'),b=lastVar(D.cepeaSP,'ani'),c=lastVar(D.cepeaNE.AL,'hid'),d=lastVar(D.cepeaNE.AL,'ani');
+  const bl=D.b100.serie.at(-1);
+  $('#kpis').innerHTML=
+    kpi('Hidratado · SP','R$ '+f4(a.l.v),'na semana '+a.l.sem,a.v)+
+    kpi('Anidro · SP','R$ '+f4(b.l.v),'na semana '+b.l.sem,b.v)+
+    kpi('Hidratado · AL','R$ '+f4(c.l.v),'na semana '+c.l.sem,c.v)+
+    kpi('Anidro · AL','R$ '+f4(d.l.v),'na semana '+d.l.sem,d.v)+
+    kpi('B100 · média ANP','R$ '+f4(bl.valor),'semana '+bl.sem+' (última confirmada)',null)+
+    kpi('Paridade bomba · Brasil',f2(D.bomba.brasil.paridade)+'%','etanol/gasolina, '+D.bomba.semana,null);
+  const al=[];
+  if(dz>=0)al.push(`PIS/Cofins do hidratado zerado só até 09/12 (faltam ${dz} dias). Se não renovar, o custo sobe na hora.`);
+  al.push('Estoque de anidro no Centro-Sul 23% menor que em 2025, com E32 em vigor.');
+  $('#alertas').innerHTML=al.map(t=>`<div class="banner">${t}</div>`).join('');
+}
+
+/* estados foco */
+{
+  const ufArr={AL:D.cepeaNE.AL,PE:D.cepeaNE.PE,MT:D.cepeaNE.MT};
+  const cel=(uf,k)=>{const a=ufArr[uf];if(!a)return '<td class="r muted hint">sem indicador</td>';const l=lastOf(a,k);return l?`<td class="r"><span class="num">${f4(l.v)}${uf==='MT'?'*':''}</span><div class="hint">${l.sem}</div></td>`:'<td class="r hint">—</td>';};
+  $('#foco tbody').innerHTML=D.estadosFoco.map(uf=>{const e=D.bomba.estados.find(x=>x.uf===uf)||{};const p=e.etanol&&e.gasolina?e.etanol/e.gasolina*100:null;
+    return `<tr><td><b>${uf}</b></td>${cel(uf,'hid')}${cel(uf,'ani')}<td class="r num">${e.etanol?'R$ '+f2(e.etanol):'—'}</td><td class="r num">${e.gasolina?'R$ '+f2(e.gasolina):'—'}</td><td class="r"><span class="num ${p==null?'':p<=70?'down':'up'}">${p==null?'—':f2(p)+'%'}</span><div class="hint">${e.semana||''}</div></td><td class="r num">${e.diesel?'R$ '+f2(e.diesel):'—'}</td></tr>`;}).join('');
+  $('#focoNota').textContent=D.semIndicadorUsina+' MT* inclui ICMS. Paridade em verde = etanol compensa na bomba.';
+}
+
+/* tendencia */
+const DIRW={alta:'Alta',queda:'Queda',estavel:'Estável'},DIRA={alta:'▲',queda:'▼',estavel:'■'};
+const forca=n=>`<span class="force">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')} ${['','fraca','moderada','forte'][n]}</span>`;
+const card=(p,full)=>`<div class="card trend"><div class="lab">${p.nome}</div><div class="dir"><div class="arrow ${p.dir}">${DIRA[p.dir]}</div><div><div class="word">${DIRW[p.dir]}</div>${forca(p.forca)}</div></div>${full?`<p>${p.motivo}</p>`:''}</div>`;
+$('#tdData').textContent='leitura de '+dBR(D.tendencia.data)+' · '+D.tendencia.horizonte;
+$('#tdMini').innerHTML=D.tendencia.produtos.map(p=>card(p,false)).join('');
+$('#tdHoriz').textContent='leitura de '+dBR(D.tendencia.data)+' · '+D.tendencia.horizonte;
+$('#tdCards').innerHTML=D.tendencia.produtos.map(p=>card(p,true)).join('');
+$('#tdRiscos').innerHTML='<b>O que pode virar a leitura</b><ul>'+D.tendencia.riscos.map(r=>`<li>${r}</li>`).join('')+'</ul>';
+$('#placar tbody').innerHTML=D.tendencia.placar.length?D.tendencia.placar.map(r=>`<tr><td>${dBR(r.data)}</td><td>${r.produto}</td><td>${DIRW[r.previsto]}</td><td class="num">${pct(r.realPct)}</td><td><span class="badge ${r.acerto?'good':'bad'}">${r.acerto?'Acertou':'Errou'}</span></td></tr>`).join(''):'<tr><td colspan="5" class="hint" style="white-space:normal">Primeira leitura feita em 13/11/26. O placar começa a ser preenchido quando sair o CEPEA da semana seguinte.</td></tr>';
+
+/* ---------- ESALQ: painel geral e por estado ---------- */
+function valAt(arr,fim,k){const w=arr.find(x=>x.fim===fim);return w?w[k]:null;}
+const UFN={SP:'São Paulo',GO:'Goiás',MT:'Mato Grosso',PE:'Pernambuco',AL:'Alagoas',PB:'Paraíba',BA:'Bahia',MA:'Maranhão',TO:'Tocantins'};
+const PAL=['#2f9be0','#c2410c','#db2777','#13834a','#6250d6','#a16207','#0891b2','#475569','#e11d48','#0d9488'];
+const ESL=D.esalq;
+const UFS=[...new Set([...ESL.map(s=>s.uf),...D.estadosFoco])];
+const PRODS=['Hidratado','Anidro','Outros fins'],PERS=['Semanal','Mensal','Diário'];
+const E={modo:'geral',uf:'todos',prod:'todos',per:'Semanal',sel:new Set(['SP-hid-sem','AL-hid-sem','GO-hid-sem','PE-hid-sem'])};
+const colorOf=id=>{const i=(E.chart||[]).findIndex(s=>s.id===id);return i<0?'transparent':PAL[i%PAL.length];};
+const lbl=s=>`${s.uf}${s.comICMS?'*':''} · ${s.nome}`;
+function chipRow(el,opts,cur,attr){el.innerHTML=opts.map(([v,t])=>`<button class="chip" data-${attr}="${v}" aria-pressed="${cur===v}">${t}</button>`).join('');}
+function filtered(){return ESL.filter(s=>(E.uf==='todos'||s.uf===E.uf)&&(E.prod==='todos'||s.prod===E.prod)&&(E.per==='todas'||s.per===E.per));}
+function stats(s){const p=s.pontos,l=p.at(-1),pr=p.at(-2),f=p[0],q=p.length>=5?p.at(-5):null;return{l,pr,f,q,var1:pr?(l.v/pr.v-1)*100:null,var4:q?(l.v/q.v-1)*100:null,varAll:p.length>1?(l.v/f.v-1)*100:null};}
+function renderE(){
+  document.querySelectorAll('#eModo button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===E.modo)));
+  if(E.modo==='estado'&&E.uf==='todos')E.uf='AL';
+  chipRow($('#eUF'),[...(E.modo==='geral'?[['todos','Todos']]:[]),...UFS.map(u=>[u,u])],E.uf,'uf');
+  chipRow($('#eProd'),[['todos','Todos'],...PRODS.map(p=>[p,p])],E.prod,'prod');
+  chipRow($('#ePer'),[['todas','Todos'],...PERS.map(p=>[p,p])],E.per,'per');
+  const list=filtered();
+  let chartList;
+  if(E.modo==='geral'){
+    $('#eEstadoHead').innerHTML='';
+    const top=list.slice().sort((a,b)=>(b.pontos.at(-1).fim>a.pontos.at(-1).fim?1:-1)).slice(0,4);
+    $('#eKpis').innerHTML=top.map(s=>{const t=stats(s);return kpi(lbl(s)+' · '+s.per,'R$ '+f4(t.l.v),t.l.p,t.var1);}).join('');
+    chartList=list.filter(s=>E.sel.has(s.id));
+    if(!chartList.length)chartList=list.slice(0,4);
+    E.chart=chartList;
+    $('#eChartHint').textContent='Toque numa linha da tabela para colocar ou tirar a série do gráfico.';
+    $('#eTabelas').innerHTML=`<div class="section-h"><h2>Todos os indicadores (${list.length})</h2><span class="hint">Mais recente primeiro</span></div><div class="card tablewrap"><table><thead><tr><th>Indicador</th><th>Período</th><th>Base</th><th>Último</th><th class="r">R$/L</th><th class="r">Var.</th><th class="r">4 períodos</th><th class="r">Na série</th></tr></thead><tbody>${
+      list.slice().sort((a,b)=>a.pontos.at(-1).fim<b.pontos.at(-1).fim?1:-1).map(s=>{const t=stats(s);const on=chartList.includes(s);
+      return `<tr class="pick" data-id="${s.id}"><td><span class="sw" style="background:${colorOf(s.id)}"></span><b>${s.uf}${s.comICMS?'*':''}</b> · ${s.nome}</td><td>${s.per}</td><td class="hint">${s.base}</td><td>${t.l.p}</td><td class="r num"><b>${f4(t.l.v)}</b></td><td class="r num ${cls(t.var1)}">${pct(t.var1)}</td><td class="r num ${cls(t.var4)}">${pct(t.var4)}</td><td class="r num ${cls(t.varAll)}">${pct(t.varAll)}<div class="hint">desde ${t.f.p}</div></td></tr>`;}).join('')||'<tr><td colspan="8" class="hint">Nenhum indicador com esses filtros.</td></tr>'}</tbody></table></div>`;
+  }else{
+    const uf=E.uf,e=D.bomba.estados.find(x=>x.uf===uf);const p=e&&e.etanol&&e.gasolina?e.etanol/e.gasolina*100:null;
+    $('#eEstadoHead').innerHTML=`<div class="uf-head"><h2>${UFN[uf]||uf}</h2><span class="hint">${ESL.filter(s=>s.uf===uf).length} indicador(es) ESALQ${e?` · bomba ${e.semana}: etanol R$ ${f2(e.etanol)}, gasolina R$ ${f2(e.gasolina)}, paridade <b class="${p<=70?'down':'up'}">${f2(p)}%</b>${e.diesel?`, diesel S10 R$ ${f2(e.diesel)}`:''}`:''}</span></div>`;
+    $('#eKpis').innerHTML=list.map(s=>{const t=stats(s);return kpi(s.nome+' · '+s.per,'R$ '+f4(t.l.v),`${t.l.p}${t.var4!=null?` · <span class="num ${cls(t.var4)}">${pct(t.var4)}</span> em 4 períodos`:''}`,t.var1);}).join('')||`<div class="card note-box">${ESL.some(s=>s.uf===uf)?'Nenhum indicador desse estado com esses filtros.':'O CEPEA/ESALQ não publica indicador de preço na usina para '+(UFN[uf]||uf)+'. Use a bomba acima e, para a compra, as praças de origem (AL, PE, GO, MT).'}</div>`;
+    chartList=list;E.chart=chartList;
+    $('#eChartHint').textContent=list.length?'':'';
+    const groups=PERS.map(per=>[per,list.filter(s=>s.per===per)]).filter(g=>g[1].length);
+    $('#eTabelas').innerHTML=groups.map(([per,ss])=>{
+      const fims=[...new Map(ss.flatMap(s=>s.pontos.map(p=>[p.fim,p.p]))).entries()].sort((a,b)=>a[0]<b[0]?1:-1);
+      return `<div class="section-h"><h2>${per}</h2><span class="hint">Variação contra o período anterior da mesma série</span></div><div class="card tablewrap"><table><thead><tr><th>Período</th>${ss.map(s=>`<th class="r">${s.nome}${s.comICMS?'*':''}</th><th class="r">Var.</th>`).join('')}</tr></thead><tbody>${
+        fims.map(([fim,pp])=>`<tr><td>${pp}</td>${ss.map(s=>{const i=s.pontos.findIndex(x=>x.fim===fim);if(i<0)return '<td class="r hint">—</td><td></td>';const v=s.pontos[i].v,pr=s.pontos[i-1];const vr=pr?(v/pr.v-1)*100:null;return `<td class="r num">${f4(v)}</td><td class="r num ${cls(vr)}">${pct(vr)}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div>`;}).join('');
+  }
+  $('#eLegend').innerHTML=chartList.map(s=>`<span><i style="background:${colorOf(s.id)}"></i>${lbl(s)}${E.per==='todas'?' · '+s.per:''}</span>`).join('');
+  $('#eFig').closest('.chartbox').classList.toggle('hide',!chartList.length);
+  drawH();
+}
+$('#eModo').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;E.modo=b.dataset.m;if(E.modo==='geral')E.uf='todos';renderE();});
+$('#eUF').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;E.uf=b.dataset.uf;renderE();});
+$('#eProd').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;E.prod=b.dataset.prod;renderE();});
+$('#ePer').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;E.per=b.dataset.per;renderE();});
+$('#eTabelas').addEventListener('click',e=>{const r=e.target.closest('tr.pick');if(!r)return;const id=r.dataset.id;if(E.sel.has(id))E.sel.delete(id);else E.sel.add(id);renderE();});
+const T=d=>new Date(d+'T12:00:00').getTime();
+function timeChart(svg,series){
+  const W=svg.clientWidth,Hh=svg.clientHeight;if(!W)return null;
+  const narrow=W<520,pl=narrow?44:54,pr=12,pt=12,pb=28;
+  const pts=series.flatMap(s=>s.pontos);if(!pts.length){svg.innerHTML='<text x="50%" y="50%" text-anchor="middle" fill="var(--text-3)" font-size="13">Sem dados para mostrar</text>';return null;}
+  let mn=Math.min(...pts.map(p=>p.v)),mx=Math.max(...pts.map(p=>p.v));const pad=(mx-mn)*.12||.1;mn-=pad;mx+=pad;
+  let t0=Math.min(...pts.map(p=>T(p.fim))),t1=Math.max(...pts.map(p=>T(p.fim)));if(t1===t0){t0-=864e5*7;t1+=864e5*7;}
+  const x=t=>pl+(t-t0)*(W-pl-pr)/(t1-t0),y=v=>pt+(mx-v)*(Hh-pt-pb)/(mx-mn);
+  let o='';for(let k=0;k<=4;k++){const v=mn+(mx-mn)*k/4;o+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="JetBrains Mono">${f2(v)}</text>`;}
+  const nt=narrow?3:6;for(let k=0;k<=nt;k++){const t=t0+(t1-t0)*k/nt;const d=new Date(t);o+=`<text x="${x(t)}" y="${Hh-8}" text-anchor="${k===0?'start':k===nt?'end':'middle'}" font-size="11" fill="var(--text-3)">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}${(t1-t0)>864e5*200?'/'+String(d.getFullYear()).slice(2):''}</text>`;}
+  for(const s of series){const c=colorOf(s.id);o+=`<path d="${s.pontos.map((p,i)=>(i?'L':'M')+x(T(p.fim)).toFixed(1)+' '+y(p.v).toFixed(1)).join('')}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" ${s.per==='Mensal'?'stroke-dasharray="6 4"':''}/>`+s.pontos.map(p=>`<circle cx="${x(T(p.fim))}" cy="${y(p.v)}" r="${s.per==='Diário'?2.5:3.5}" fill="${c}"/>`).join('');}
+  svg.innerHTML=o;return{x,t0,t1,pl,pr,W};
+}
+function drawH(){
+  const svg=$('#eFig svg');const ss=E.chart||[];const g=timeChart(svg,ss);const tip=$('#tip');
+  if(!g){svg.onmousemove=null;return;}
+  svg.onmousemove=ev=>{const r=svg.getBoundingClientRect();const px=ev.clientX-r.left;const t=g.t0+(px-g.pl)*(g.t1-g.t0)/(g.W-g.pl-g.pr);
+    const rows=ss.map(s=>{let b=null,bd=Infinity;for(const p of s.pontos){const d=Math.abs(T(p.fim)-t);if(d<bd){bd=d;b=p;}}return bd<864e5*(s.per==='Mensal'?20:5)?`<div class="row"><span><span class="sw" style="background:${colorOf(s.id)}"></span>${s.uf} ${s.prod.slice(0,3)}. · ${b.p}</span><span class="num">${f4(b.v)}</span></div>`:'';}).join('');
+    if(!rows){tip.style.display='none';return;}tip.innerHTML=rows;tip.style.display='block';tip.style.left=Math.max(4,Math.min(px+16,r.width-220))+'px';tip.style.top='40px';};
+  svg.onmouseleave=()=>tip.style.display='none';
+}
+function lineChart(svg,series,labels,fmt){
+  const W=svg.clientWidth,Hh=svg.clientHeight;if(!W)return;
+  const narrow=W<520,pl=narrow?44:54,pr=12,pt=12,pb=28;
+  const all=series.flatMap(s=>s.vals.filter(v=>v!=null));if(!all.length){svg.innerHTML='';return;}
+  let mn=Math.min(...all),mx=Math.max(...all);const pad=(mx-mn)*.12||.1;mn-=pad;mx+=pad;
+  const n=labels.length,x=i=>pl+(n<2?0:i*(W-pl-pr)/(n-1)),y=v=>pt+(mx-v)*(Hh-pt-pb)/(mx-mn);
+  let o='';for(let t=0;t<=4;t++){const v=mn+(mx-mn)*t/4;o+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--text-3)" font-family="JetBrains Mono">${fmt(v)}</text>`;}
+  const step=Math.ceil(n/(narrow?4:7));labels.forEach((l,i)=>{if(i%step===0||i===n-1)o+=`<text x="${x(i)}" y="${Hh-8}" text-anchor="${i===0?'start':i===n-1?'end':'middle'}" font-size="11" fill="var(--text-3)">${l}</text>`;});
+  for(const s of series){let d='',pen=false;s.vals.forEach((v,i)=>{if(v==null)return;d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true;});o+=`<path d="${d}" fill="none" stroke="${s.cor}" stroke-width="2.5" ${s.dash?'stroke-dasharray="5 4"':''}/>`;s.vals.forEach((v,i)=>{if(v!=null)o+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="${s.cor}"/>`;});}
+  svg.innerHTML=o;
+}
+
+/* etanol NE x CS */
+{
+  const rows=[];let semRef='';
+  for(const uf of ['AL','PE'])for(const k of ['hid','ani']){
+    const arr=D.cepeaNE[uf];const l=lastOf(arr,k);if(!l)continue;const sp=valAt(D.cepeaSP,l.fim,k);semRef=l.sem;
+    const d=sp!=null?l.v-sp:null;
+    rows.push(`<tr><td>${PN[k]}</td><td>${uf} · ${l.sem}</td><td class="r num">${f4(l.v)}</td><td class="r num">${f4(sp)}</td><td class="r num ${cls(d)}">${sgn(d)}</td><td class="tw"><div>${d==null?'SP sem indicador nessa semana':d<0?'NE mais barato que SP na usina: compra local tende a ganhar':'SP mais barato na usina: avaliar frete do Centro-Sul'}</div></td></tr>`);}
+  $('#spread tbody').innerHTML=rows.join('');$('#spreadSem').textContent='Última semana com dado das duas praças';
+  $('#bomba tbody').innerHTML=D.bomba.estados.map(e=>{const p=e.paridade??(e.etanol&&e.gasolina?e.etanol/e.gasolina*100:null);return `<tr><td><b>${e.uf}</b></td><td>${e.semana}</td><td class="r num">${e.etanol?'R$ '+f2(e.etanol):'—'}</td><td class="r num">${e.gasolina?'R$ '+f2(e.gasolina):'—'}</td><td class="r num">${f2(p)}%</td><td class="r num">${e.diesel?'R$ '+f2(e.diesel):'—'}</td><td>${p==null?'':p<=70?'<span class="badge good">Etanol compensa</span>':'<span class="badge warn">Gasolina compensa</span>'}</td></tr>`;}).join('');
+  $('#bombaNota').textContent=D.bomba.nota+' Brasil: etanol R$ '+f2(D.bomba.brasil.etanol)+'/L, paridade '+f2(D.bomba.brasil.paridade)+'%.';
+  $('#ofertaFonte').textContent=D.oferta.fonte;
+  $('#oferta').innerHTML=D.oferta.itens.map(i=>kpi(i.nome,i.valor,i.ref,i.var,true)).join('');
+  $('#ofertaLeitura').innerHTML='<b>Leitura:</b> '+D.oferta.leitura+` Paulínia (com frete) R$ ${f4(D.paulinia.valor)}/L em ${dBR(D.paulinia.data)}; B3 ${D.b3.contrato} R$ ${f4(D.b3.valor)}/L em ${dBR(D.b3.data)}.`;
+}
+
+/* B100 */
+{
+  const B=D.b100,l=B.serie.at(-1),c=B.custoMP;const mg=l.valor-c.valor;
+  $('#bKpis').innerHTML=kpi('B100 · média ANP','R$ '+f4(l.valor),'semana '+l.sem+' ('+dBR(l.data)+') vs '+B.serie.at(-2).sem,(l.valor/B.serie.at(-2).valor-1)*100)+
+    kpi('Custo matéria-prima','R$ '+f4(c.valor),'Indexador BiodieselBR em '+dBR(c.data),c.var)+
+    kpi('Preço − custo',sgn(mg),'usina no vermelho quando negativo',null)+
+    kpi('Soja Paranaguá','R$ '+f2(B.soja.paranagua),'saca, '+dBR(B.soja.data)+' · no mês',B.soja.varMes)+
+    kpi('Óleo de soja CBOT',f2(B.oleoCBOT.valor)+' ¢/lb',B.oleoCBOT.contrato+', '+dBR(B.oleoCBOT.data),B.oleoCBOT.var);
+  $('#bDiesel tbody').innerHTML=D.dieselA.map(d=>{const df=l.valor-d.valor;return `<tr><td>${d.base}</td><td>${d.fornecedor} · ${dBR(d.vig)}</td><td class="r num">${f4(d.valor)}</td><td class="r num">${f4(l.valor)}</td><td class="r num up">${sgn(df)}</td><td class="r num">${sgn(df*.15)}</td></tr>`;}).join('');
+  $('#bNota').textContent=B.sinalRecente+' A última média ANP confirmada é da '+l.sem+'; quando sair a nova, o painel atualiza.';
+}
+function drawB(){
+  const B=D.b100;const svg=$('#bFig svg');
+  lineChart(svg,[{cor:'var(--b100)',vals:B.serie.map(s=>s.valor)},{cor:'var(--cost)',dash:true,vals:B.serie.map((s,i)=>i===B.serie.length-1?B.custoMP.valor:null)}],B.serie.map(s=>s.sem),v=>f2(v));
+}
+
+/* origem */
+const O={frete:{},preco:{}};
+function renderO(){
+  const k=$('#oProd').value,base=$('#oBase').value;
+  const src=[{id:'MT',nome:'Mato Grosso (usina)',p:null},{id:'AL',nome:'Alagoas (CEPEA)',p:lastOf(D.cepeaNE.AL,k)?.v},{id:'PE',nome:'Pernambuco (CEPEA set/26)',p:lastOf(D.cepeaNE.PE,k)?.v},{id:'SP',nome:'Centro-Sul (CEPEA SP)',p:lastOf(D.cepeaSP,k)?.v},{id:'IMP',nome:'Importado',p:null}];
+  const rows=src.map(s=>{const key=k+s.id,fk=base+s.id;const p=O.preco[key]??s.p;const fr=O.frete[fk];const tot=p!=null&&fr!=null?p+fr:null;return{...s,key,fk,p,fr,tot};});
+  const best=rows.filter(r=>r.tot!=null).sort((a,b)=>a.tot-b.tot)[0];
+  $('#oTable tbody').innerHTML=rows.map(r=>`<tr><td>${r.nome}</td><td class="r"><input class="num" inputmode="decimal" style="width:110px;text-align:right" data-pk="${r.key}" value="${r.p!=null?f4(r.p):''}" placeholder="R$/L"></td><td class="r"><input class="num" inputmode="decimal" style="width:100px;text-align:right" data-fk="${r.fk}" value="${r.fr!=null?f4(r.fr):''}" placeholder="R$/L"></td><td class="r num"><b>${r.tot!=null?'R$ '+f4(r.tot):'—'}</b></td><td>${best&&r===best?'<span class="badge good">Mais barato</span>':''}</td></tr>`).join('');
+}
+const pn=s=>{s=String(s).replace(/R\$|\s/g,'');if(!s)return null;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const v=parseFloat(s);return isNaN(v)?null:(v>100?v/1000:v);};
+$('#oTable').addEventListener('change',e=>{const t=e.target;if(t.dataset.pk)O.preco[t.dataset.pk]=pn(t.value);if(t.dataset.fk)O.frete[t.dataset.fk]=pn(t.value);renderO();});
+$('#oProd').addEventListener('change',renderO);$('#oBase').addEventListener('change',renderO);
+
+/* regras e fontes */
+$('#regras tbody').innerHTML=D.regras.map(r=>`<tr><td><b>${r.tema}</b></td><td><span class="badge">${r.status}</span></td><td class="tw"><div>${r.det}</div></td><td>${r.alerta?`<span class="badge warn">${r.alerta}</span>`:''}</td></tr>`).join('');
+$('#fontes').innerHTML=D.fontes.map(f=>`<li><a href="${f.url}" target="_blank" rel="noopener">${f.nome}</a></li>`).join('');
+
+renderE();renderO();
+new ResizeObserver(()=>{if(!$('#tab-historico').classList.contains('hide'))drawH();if(!$('#tab-b100').classList.contains('hide'))drawB();}).observe(document.body);
+const h=location.hash.slice(1);if(tabs.some(b=>b.dataset.tab===h))show(h);
+}
+</script>
+</body>
+</html>
