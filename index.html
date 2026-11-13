@@ -215,8 +215,9 @@ input.val{width:110px;text-align:right}
     <div class="section-h"><h2>Por base</h2><span class="hint">Mesma direção para todas as bases, aplicada ao preço atual de cada uma</span></div>
     <div class="chips" id="tdProdChips"></div>
     <div class="card tablewrap"><table id="tdBases"><thead><tr><th>Base</th><th>Produto</th><th class="r">Acelen hoje (c/ trib.)</th><th>Tendência</th><th class="r">Faixa estimada (R$/L)</th><th class="r">Preço provável</th></tr></thead><tbody></tbody></table></div>
-    <div class="section-h"><h2>Placar de acerto</h2><span class="hint" id="tdPlacarResumo"></span></div>
-    <div class="card tablewrap"><table id="tdPlacar"><thead><tr><th>Reajuste</th><th>Gasolina A</th><th>Diesel S10</th><th>Diesel S500</th><th>Resultado</th></tr></thead><tbody></tbody></table></div>
+    <div class="section-h"><h2>Assertividade da previsão</h2><span class="hint" id="tdPlacarResumo"></span></div>
+    <div class="kpis" id="tdKpis" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))"></div>
+    <div class="card tablewrap"><table id="tdPlacar"><thead><tr><th>Reajuste</th><th>Gasolina A</th><th>Diesel S10</th><th>Diesel S500</th><th>Observação</th></tr></thead><tbody></tbody></table></div>
     <p class="hint" style="margin-top:10px">Como é calculado: a Acelen segue a paridade de importação, ou seja, o custo de trazer o produto dos EUA (cotações de gasolina e diesel em Nova York, Brent), convertido pelo dólar, mais frete. A leitura compara a média da semana corrente com a semana que formou o último preço e soma a defasagem Acelen × PPI. Mostra a direção provável, não o valor exato. Subvenções do governo e decisões comerciais da Acelen podem desviar o resultado.</p>
   </section>
 
@@ -752,17 +753,26 @@ function renderTendencia(){
       el('td',{class:'r num'},t.dir==='estavel'?'±0,0000':brl(lo)+' a '+brl(hi)),
       el('td',{class:'r num'},t.dir==='estavel'?f4(c.total):f4(c.total+lo)+' – '+f4(c.total+hi))));}
   // placar
-  const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0;
+  const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0,fo=0,ft=0;const st={GAA:{o:0,t:0},S10:{o:0,t:0},S500:{o:0,t:0}};
   const av=T.filter(x=>x.avaliacao).sort((a,b)=>a.data<b.data?1:-1);
   const cell=(x,p)=>{const a=x.avaliacao,pr=a.previsto&&a.previsto[p],re=a.real&&a.real[p];if(!pr)return el('td',{class:'muted'},'—');
-    const hit=a.acerto&&a.acerto[p];if(hit!=null){tot++;if(hit)ok++;}
-    return el('td',{},el('span',{class:'eff '+DIRC[pr]},'Previsto '+DIRA[pr]),' ',el('span',{class:'muted'},'· real '),re!=null?el('span',{class:'num '+(re>0?'delta-up':re<0?'delta-down':'muted')},brl(re)):'—',' ',hit==null?null:el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertou':'errou'));};
+    const hit=a.acerto&&a.acerto[p];if(hit!=null){tot++;if(hit)ok++;st[p].t++;if(hit)st[p].o++;}
+    const nf=a.naFaixa&&a.naFaixa[p];if(nf!=null){ft++;if(nf)fo++;}
+    const rp=a.realPct&&a.realPct[p],fx=a.faixaPct&&a.faixaPct[p];
+    return el('td',{},el('span',{class:'eff '+DIRC[pr]},'Previsto '+DIRA[pr]),fx?el('span',{class:'muted num'},' '+pct(fx[0])+' a '+pct(fx[1])):null,' ',el('span',{class:'muted'},'· real '),re!=null?el('span',{class:'num '+(re>0?'delta-up':re<0?'delta-down':'muted')},brl(re)+(rp!=null?' ('+pct(rp)+')':'')):'—',' ',hit==null?null:el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertou':'errou'),nf==null?null:el('span',{class:'okbadge '+(nf?'y':'p'),style:'margin-left:4px'},nf?'na faixa':'fora da faixa'));};
   for(const x of av){const a=x.avaliacao;
     pt.append(el('tr',{},el('td',{class:'num'},dBR(a.reajuste),a.reconstituido?el('div',{class:'hint'},'reconstituído'):null),cell(x,'GAA'),cell(x,'S10'),cell(x,'S500'),
       el('td',{style:'white-space:normal;min-width:220px'},a.nota?el('span',{class:'hint'},a.nota):'')));}
   const pend=T.filter(x=>!x.avaliacao);if(pend.length)pt.prepend(el('tr',{},el('td',{class:'num'},dBR(L.proxReajuste)),...PRODS.map(p=>{const t=L.produtos&&L.produtos[p];return el('td',{},t?el('span',{class:'eff '+DIRC[t.dir]},'Previsto '+DIRA[t.dir]):'—');}),el('td',{},el('span',{class:'okbadge p'},'aguardando reajuste'))));
   if(!av.length&&!pend.length)pt.append(el('tr',{},el('td',{colspan:5,class:'empty'},'Sem histórico ainda.')));
-  $('#tdPlacarResumo').textContent=tot?`Acertou a direção em ${ok} de ${tot} previsões (${Math.round(ok/tot*100)}%)`:'O placar começa a contar a partir do próximo reajuste';
+  const nReaj=av.filter(x=>x.avaliacao.acerto).length;
+  $('#tdPlacarResumo').textContent=tot?`${nReaj} reajuste${nReaj>1?'s':''} avaliado${nReaj>1?'s':''} · conta a última leitura antes de cada reajuste`:'Começa a contar a partir do próximo reajuste';
+  const kp=$('#tdKpis');kp.replaceChildren();
+  const kpi=(lab,o,t,note)=>el('div',{class:'card kpi'},el('div',{class:'lab'},lab),el('div',{class:'big num'},t?Math.round(o/t*100)+'%':'—'),el('div',{class:'note'},t?note(o,t):'Ainda sem reajuste avaliado'));
+  kp.append(kpi('Acerto de direção · geral',ok,tot,(o,t)=>`${o} de ${t} previsões (alta, queda ou estável)`));
+  for(const p of PRODS)kp.append(kpi(PNAME[p],st[p].o,st[p].t,(o,t)=>`${o} de ${t} reajustes na direção certa`));
+  kp.append(kpi('Dentro da faixa estimada',fo,ft,(o,t)=>`${o} de ${t}: o reajuste real caiu no intervalo previsto`));
+  if(!ft)kp.lastChild.querySelector('.note').textContent='Começa a contar no próximo reajuste (as avaliações antigas não tinham faixa)';
 }
 
 /* ---------- tabs ---------- */
