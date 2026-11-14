@@ -211,6 +211,11 @@ input.val{width:110px;text-align:right}
     <div class="section-h"><h2>O que está puxando</h2><span class="hint" id="tdJanela"></span></div>
     <div class="card tablewrap"><table id="tdDrivers"><thead><tr><th>Indicador</th><th class="r">Semana anterior</th><th class="r">Agora</th><th class="r">Variação</th><th>Efeito no preço</th></tr></thead><tbody></tbody></table></div>
     <div class="card note-box" id="tdNota" style="margin-top:10px"></div>
+    <div class="section-h"><h2>Paridade de importação pela curva futura</h2><span class="hint" id="pfStatus"></span></div>
+    <div class="chips" id="pfProdChips"></div>
+    <div class="card tablewrap"><table id="pfTable"><thead><tr><th>Mês</th><th class="r" id="pfColNY">Gasolina NY (US$/gal)</th><th class="r">Dólar futuro</th><th class="r">Paridade (R$/L)</th><th class="r">Faixa provável</th><th class="r">Acelen hoje</th><th class="r">Petrobras hoje</th><th>Janela</th></tr></thead><tbody></tbody></table></div>
+    <div class="card note-box" id="pfNota" style="margin-top:10px"></div>
+    <p class="hint" style="margin-top:8px" id="pfComo">Como é calculado: paridade = (cotação futura em Nova York + ajuste de frete, prêmio e custos) ÷ 3,785 × dólar futuro, sem tributos. O ajuste é calibrado para bater com a paridade estimada de hoje. O dólar futuro é o dólar de hoje corrigido pela diferença de juros Brasil × EUA. Faixa provável: cerca de 2 em 3 chances, pela volatilidade histórica (cresce com o prazo). Janela aberta = paridade abaixo do preço nacional, ou seja, importar compensa e tende a chegar navio.</p>
     <div class="section-h"><h2>Por base</h2><span class="hint">Mesma direção para todas as bases, aplicada ao preço atual de cada uma</span></div>
     <div class="chips" id="tdProdChips"></div>
     <div class="card tablewrap"><table id="tdBases"><thead><tr><th>Base</th><th>Produto</th><th class="r">Acelen hoje (c/ trib.)</th><th>Tendência</th><th class="r">Faixa estimada (R$/L)</th><th class="r">Preço provável</th></tr></thead><tbody></tbody></table></div>
@@ -722,6 +727,30 @@ function renderTendencia(){
   if(!ft)kp.lastChild.querySelector('.note').textContent='Começa a contar no próximo reajuste (as avaliações antigas não tinham faixa)';
 }
 
+/* ---------- ppi pela curva futura ---------- */
+state.pfProd='GAA';
+function avgForn(f,p){const xs=itemsCfg(f).filter(i=>i.produto===p).map(i=>lastTwo(f,i.base+'|'+p).cur).filter(Boolean);return xs.length?xs.reduce((a,x)=>a+(+x.item.valor),0)/xs.length:null;}
+function renderPF(){
+  const T=[...state.tend].filter(x=>x.ppiFuturo).sort((a,b)=>a.data<b.data?-1:1);const L=T[T.length-1];
+  const tb=$('#pfTable tbody');tb.replaceChildren();const ch=$('#pfProdChips');ch.replaceChildren();
+  if(!L){$('#pfStatus').textContent='';tb.append(el('tr',{},el('td',{colspan:8,class:'empty'},'Ainda sem leitura da curva futura.')));$('#pfNota').classList.add('hide');return;}
+  const F=L.ppiFuturo,p=state.pfProd;
+  for(const q of ['GAA','S10'])ch.append(el('button',{class:'chip','aria-pressed':String(p===q),onclick:()=>{state.pfProd=q;renderPF();}},q==='GAA'?'Gasolina A':'Diesel S10'));
+  $('#pfStatus').textContent=`Curva de ${dBR(F.data)} · sem tributos · média das bases`;
+  $('#pfColNY').textContent=p==='GAA'?'Gasolina NY (US$/gal)':'Diesel NY (US$/gal)';
+  const A=avgForn('acelen',p),P=avgForn('petrobras',p);
+  const n2=v=>v==null?'—':(+v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const gap=(ref,ppi)=>ref==null?el('span',{class:'muted'},'—'):el('span',{},el('span',{class:'num'},f4(ref)),el('div',{class:'hint num'},pct((ref/ppi-1)*100)+' vs paridade'));
+  const jan=ppi=>{const mn=Math.min(...[A,P].filter(v=>v!=null));if(!isFinite(mn))return el('span',{class:'muted'},'—');const d=(mn/ppi-1)*100;
+    if(d>1)return el('span',{},el('span',{class:'eff down'},'Aberta'),el('div',{class:'hint'},'importado compensa'));if(d>-2)return el('span',{},el('span',{class:'eff flat'},'No limite'),el('div',{class:'hint'},'importado quase empata'));return el('span',{},el('span',{class:'eff flat'},'Fechada'),el('div',{class:'hint'},'sem pressão de navio'));};
+  const row=(lab,ny,usd,ppi,fx,hint)=>tb.append(el('tr',{},el('td',{},el('b',{},lab),hint?el('div',{class:'hint'},hint):null),el('td',{class:'r num'},n2(ny)),el('td',{class:'r num'},usd==null?'—':(+usd).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})),
+    el('td',{class:'r num'},el('b',{},f4(ppi))),el('td',{class:'r num'},fx?f4(fx[0])+' – '+f4(fx[1]):'—'),el('td',{class:'r'},gap(A,ppi)),el('td',{class:'r'},gap(P,ppi)),el('td',{},jan(ppi))));
+  const H=F.hoje||{};row('Hoje',p==='GAA'?H.rbob:H.ulsd,H.usd,H[p],null,'fechamento '+dBR(F.data));
+  for(const m of (F.meses||[]))row(m.rotulo,p==='GAA'?m.rbob:m.ulsd,m.usd,m[p],m.faixa&&m.faixa[p],m.faixaPct!=null?'faixa ±'+String(m.faixaPct).replace('.',',')+'%':'');
+  const nota=$('#pfNota');nota.classList.remove('hide');
+  nota.replaceChildren(...[el('b',{},'Leitura: '),F.leitura||'',p==='S10'?el('div',{class:'hint',style:'margin-top:6px'},'Diesel: o preço nacional está muito abaixo da paridade por causa da subvenção. A curva mostra a direção do mercado lá fora, mas a janela não abre enquanto a subvenção durar.'):null,F.fontes?el('div',{class:'hint',style:'margin-top:6px'},'Fontes: '+F.fontes):null].filter(x=>x!=null));
+}
+
 /* ---------- tabs ---------- */
 function showTab(t){
   for(const b of document.querySelectorAll('nav.tabs button'))b.setAttribute('aria-selected',String(b.dataset.tab===t));
@@ -736,7 +765,7 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 
 function renderAll(){
   if(!state.config)return;
-  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderConfig();renderVariacao();renderTendencia();fillMix();
+  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderConfig();renderVariacao();renderTendencia();renderPF();fillMix();
   if($('#ov').classList.contains('open'))checkExisting();
 }
 
