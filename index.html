@@ -183,7 +183,7 @@ input.val{width:110px;text-align:right}
     <div class="kpis" id="kpis"></div>
     <div class="section-h">
       <h2>Comparativo por base</h2>
-      <div class="chips" id="prodChips" style="margin:0"></div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end"><div class="chips" id="regChips" style="margin:0"></div><div class="chips" id="prodChips" style="margin:0"></div></div>
     </div>
     <div class="card tablewrap">
       <table id="cmpTable">
@@ -352,7 +352,11 @@ function lastTwo(f,key){const s=snapsOf(f);const found=[];for(let i=s.length-1;i
 function itemsCfg(f){return (state.config&&state.config.itens||[]).filter(i=>i.fornecedor===f);}
 function hasItem(f,b,p){return itemsCfg(f).some(i=>i.base===b&&i.produto===p);}
 function bases(){return state.config&&state.config.bases||[];}
-function baseLabel(b){const a=state.config&&state.config.apelidos||{};return a[b]?`${b} (${a[b]})`:b;}
+function ufOf(b){return (state.config&&state.config.ufs||{})[b]||'';}
+function baseLabel(b){const a=state.config&&state.config.apelidos||{};const u=ufOf(b);return (a[b]?`${b} (${a[b]})`:b)+(u?' · '+u:'');}
+const REGIAO={AM:'Norte',PA:'Norte',AP:'Norte',RR:'Norte',RO:'Norte',AC:'Norte',TO:'Norte',MA:'Nordeste',PI:'Nordeste',CE:'Nordeste',RN:'Nordeste',PB:'Nordeste',PE:'Nordeste',AL:'Nordeste',SE:'Nordeste',BA:'Nordeste',ES:'Sudeste',RJ:'Sudeste',MG:'Sudeste',SP:'Sudeste',PR:'Sul',SC:'Sul',RS:'Sul',DF:'Centro-Oeste',GO:'Centro-Oeste',MT:'Centro-Oeste',MS:'Centro-Oeste'};
+const REGS=['ambos','todas','Norte','Nordeste','Sudeste','Sul','Centro-Oeste'];const REGNAME={ambos:'Com Acelen e PB',todas:'Todas'};
+function modOf(f,b,p){const i=itemsCfg(f).find(x=>x.base===b&&x.produto===p);return i&&i.modalidade||'';}
 
 /* ---------- status ---------- */
 function origemLabel(o){return o==='site'?'Site (automático)':o==='planilha'?'Planilha antiga':o==='pdf'?'PDF Petrobras':'Manual';}
@@ -368,10 +372,13 @@ function renderStatus(){
 /* ---------- painel ---------- */
 function cmpRows(){
   const rows=[];
+  const rf=state.regFilter||'ambos';
   for(const b of bases()){ if(b==='PPI')continue;
+    if(rf!=='todas'&&rf!=='ambos'&&REGIAO[ufOf(b)]!==rf)continue;
     for(const p of PRODS){
       const ha=hasItem('acelen',b,p),hp=hasItem('petrobras',b,p);
       if(!ha&&!hp)continue;
+      if(rf==='ambos'&&!(ha&&hp))continue;
       const key=b+'|'+p;const A=lastTwo('acelen',key),P=lastTwo('petrobras',key);
       rows.push({base:b,produto:p,A,P,diff:A.cur&&P.cur?A.cur.total-P.cur.total:null});
     }
@@ -395,6 +402,7 @@ function renderKPIs(rows){
 function deltaSpan(cur,prev){if(!cur||!prev)return el('span',{class:'muted num'},'—');const d=cur.total-prev.total;if(Math.abs(d)<0.00005)return el('span',{class:'muted num',title:'desde '+dBR(prev.data)},'0,0000');return el('span',{class:'num '+(d>0?'delta-up':'delta-down'),title:'desde '+dBR(prev.data)},(d>0?'▲ ':'▼ ')+sgn(d));}
 function renderPainel(){
   const rows=cmpRows();renderKPIs(rows);
+  const rc=$('#regChips');rc.replaceChildren();for(const g of REGS){rc.append(el('button',{class:'chip','aria-pressed':String((state.regFilter||'ambos')===g),onclick:()=>{state.regFilter=g;renderPainel();}},REGNAME[g]||g));}
   const chips=$('#prodChips');chips.replaceChildren();
   for(const p of ['todos',...PRODS]){chips.append(el('button',{class:'chip','aria-pressed':String(state.prodFilter===p),onclick:()=>{state.prodFilter=p;renderPainel();}},p==='todos'?'Todos':PNAME[p]));}
   const tb=$('#cmpTable tbody');tb.replaceChildren();
@@ -413,11 +421,11 @@ function renderPainel(){
       bar=el('span',{class:'bar'},el('i',{style:`width:${w}%;${r.diff>0?'left:50%':'right:50%'};background:${r.diff>0?'var(--pb)':'var(--acelen)'}`}));
       cheap=r.diff>0?el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--pb)'}),'Petrobras'):r.diff<0?el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--acelen)'}),'Acelen'):el('span',{class:'muted'},'Empate');
     }
-    const cell=(x)=>x.cur?el('td',{class:'r'},el('span',{class:'num'},f4(x.cur.total)),el('div',{class:'hint'},dBR(x.cur.data))):el('td',{class:'r muted'},'—');
+    const cell=(x,m)=>x.cur?el('td',{class:'r'},el('span',{class:'num'},f4(x.cur.total)),el('div',{class:'hint'},(m?m+' · ':'')+dBR(x.cur.data))):el('td',{class:'r muted'},m?el('span',{title:'Sem preço'},'—'):'não vende');
     tb.append(el('tr',{},
       state.prodFilter==='todos'?null:el('td',{},baseLabel(r.base)),
       el('td',{},PNAME[r.produto]),
-      cell(r.P),cell(r.A),
+      cell(r.P,modOf('petrobras',r.base,r.produto)),cell(r.A,modOf('acelen',r.base,r.produto)),
       el('td',{class:'r'},el('div',{class:'diffcell'},el('span',{class:'num'},sgn(r.diff)),bar)),
       el('td',{},cheap),
       el('td',{class:'r'},deltaSpan(r.A.cur,r.A.prev)),
