@@ -716,8 +716,8 @@ function renderTendencia(){
   const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0,fo=0,ft=0;const st={GAA:{o:0,t:0},S10:{o:0,t:0},S500:{o:0,t:0}};
   const av=T.filter(x=>x.avaliacao).sort((a,b)=>a.data<b.data?1:-1);
   const cell=(x,p)=>{const a=x.avaliacao,pr=a.previsto&&a.previsto[p],re=a.real&&a.real[p];if(!pr)return el('td',{class:'muted'},'—');
-    const hit=a.acerto&&a.acerto[p];if(hit!=null){tot++;if(hit)ok++;st[p].t++;if(hit)st[p].o++;}
-    const nf=a.naFaixa&&a.naFaixa[p];if(nf!=null){ft++;if(nf)fo++;}
+    const hit=a.acerto&&a.acerto[p];if(hit!=null&&!a.reconstituido){tot++;if(hit)ok++;st[p].t++;if(hit)st[p].o++;}
+    const nf=a.naFaixa&&a.naFaixa[p];if(nf!=null&&!a.reconstituido){ft++;if(nf)fo++;}
     const rp=a.realPct&&a.realPct[p],fx=a.faixaPct&&a.faixaPct[p];
     return el('td',{},el('span',{class:'eff '+DIRC[pr]},'Previsto '+DIRA[pr]),fx?el('span',{class:'muted num'},' '+pct(fx[0])+' a '+pct(fx[1])):null,' ',el('span',{class:'muted'},'· real '),re!=null?el('span',{class:'num '+(re>0?'delta-up':re<0?'delta-down':'muted')},brl(re)+(rp!=null?' ('+pct(rp)+')':'')):'—',' ',hit==null?null:el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertou':'errou'),nf==null?null:el('span',{class:'okbadge '+(nf?'y':'p'),style:'margin-left:4px'},nf?'na faixa':'fora da faixa'));};
   for(const x of av){const a=x.avaliacao;
@@ -725,8 +725,8 @@ function renderTendencia(){
       el('td',{style:'white-space:normal;min-width:220px'},a.nota?el('span',{class:'hint'},a.nota):'')));}
   const pend=T.filter(x=>!x.avaliacao);if(pend.length)pt.prepend(el('tr',{},el('td',{class:'num'},dBR(L.proxReajuste)),...PRODS.map(p=>{const t=L.produtos&&L.produtos[p];return el('td',{},t?el('span',{class:'eff '+DIRC[t.dir]},'Previsto '+DIRA[t.dir]):'—');}),el('td',{},el('span',{class:'okbadge p'},'aguardando reajuste'))));
   if(!av.length&&!pend.length)pt.append(el('tr',{},el('td',{colspan:5,class:'empty'},'Sem histórico ainda.')));
-  const nReaj=av.filter(x=>x.avaliacao.acerto).length;
-  $('#tdPlacarResumo').textContent=tot?`${nReaj} reajuste${nReaj>1?'s':''} avaliado${nReaj>1?'s':''} · conta a última leitura antes de cada reajuste`:'Começa a contar a partir do próximo reajuste';
+  const nReaj=av.filter(x=>x.avaliacao.acerto&&!x.avaliacao.reconstituido).length;const nRec=av.filter(x=>x.avaliacao.reconstituido).length;
+  $('#tdPlacarResumo').textContent=tot?`${nReaj} reajuste${nReaj>1?'s':''} avaliado${nReaj>1?'s':''} · conta a última leitura antes de cada reajuste`+(nRec?` · ${nRec} avaliação(ões) montada(s) depois do reajuste fora do placar`:''):'Começa a contar a partir do próximo reajuste';
   const kp=$('#tdKpis');kp.replaceChildren();
   const kpi=(lab,o,t,note)=>el('div',{class:'card kpi'},el('div',{class:'lab'},lab),el('div',{class:'big num'},t?Math.round(o/t*100)+'%':'—'),el('div',{class:'note'},t?note(o,t):'Ainda sem reajuste avaliado'));
   kp.append(kpi('Acerto de direção · geral',ok,tot,(o,t)=>`${o} de ${t} previsões (alta, queda ou estável)`));
