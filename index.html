@@ -206,7 +206,7 @@ input.val{width:110px;text-align:right}
 
   <!-- TENDENCIA -->
   <section id="tab-tendencia" class="hide">
-    <div class="section-h" style="margin-top:0"><h2>Para onde vai o próximo reajuste da Acelen</h2><span class="hint" id="tdStatus"></span></div>
+    <div class="section-h" style="margin-top:0"><h2 id="tdTitulo">Para onde vai o próximo reajuste da Acelen</h2><span class="hint" id="tdStatus"></span></div>
     <div class="trend-grid" id="tdCards"></div>
     <div class="section-h"><h2>O que está puxando</h2><span class="hint" id="tdJanela"></span></div>
     <div class="card tablewrap"><table id="tdDrivers"><thead><tr><th>Indicador</th><th class="r">Semana anterior</th><th class="r">Agora</th><th class="r">Variação</th><th>Efeito no preço</th></tr></thead><tbody></tbody></table></div>
@@ -222,7 +222,7 @@ input.val{width:110px;text-align:right}
     <div class="section-h"><h2>Assertividade da previsão</h2><span class="hint" id="tdPlacarResumo"></span></div>
     <div class="kpis" id="tdKpis" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))"></div>
     <div class="card tablewrap"><table id="tdPlacar"><thead><tr><th>Reajuste</th><th>Gasolina A</th><th>Diesel S10</th><th>Diesel S500</th><th>Observação</th></tr></thead><tbody></tbody></table></div>
-    <p class="hint" style="margin-top:10px">Como é calculado: a Acelen segue a paridade de importação, ou seja, o custo de trazer o produto dos EUA (cotações de gasolina e diesel em Nova York, Brent), convertido pelo dólar, mais frete. A leitura compara a média da semana corrente com a semana que formou o último preço e soma a defasagem Acelen × PPI. Mostra a direção provável, não o valor exato. Subvenções do governo e decisões comerciais da Acelen podem desviar o resultado.</p>
+    <p class="hint" style="margin-top:10px">Como é calculado (modelo de 100 semanas): a Acelen corrige aos poucos a distância entre o preço dela e o custo internacional em reais da semana de quinta a quarta. Gasolina segue o Brent × dólar; diesel segue o diesel de Nova York × dólar. Testado semana a semana só com dados anteriores, acertou a direção em 84% das mudanças. Mostra a direção provável, não o valor exato. Na quinta do reajuste, esta aba mostra a confirmação da semana; a nova tendência começa à noite.</p>
   </section>
 
   <!-- VARIACAO -->
@@ -681,6 +681,23 @@ function renderTendencia(){
   const dtb=$('#tdDrivers tbody');dtb.replaceChildren();
   if(!L){cards.append(el('div',{class:'card empty'},'Ainda não há leitura de tendência. A primeira é gerada pelo Claude e depois atualizada toda quarta à tarde.'));$('#tdNota').classList.add('hide');return;}
   $('#tdNota').classList.remove('hide');
+  const RA=snapsOf('acelen').slice(-1)[0];const conf=!!(RA&&L.data<RA.data);
+  [$('#tdJanela').closest('.section-h'),$('#tdDrivers').closest('.card'),$('#tdNota'),$('#tdProdChips'),$('#tdProdChips').previousElementSibling,$('#tdBases').closest('.card')].forEach(e=>e&&e.classList.toggle('hide',conf));
+  $('#tdTitulo').textContent=conf?'Confirmação da tendência da semana':'Para onde vai o próximo reajuste da Acelen';
+  if(conf){
+    const X=T.find(x=>x.avaliacao&&x.avaliacao.reajuste===RA.data);const A=X&&X.avaliacao;
+    $('#tdStatus').textContent=`Reajuste Acelen de ${dBR(RA.data)} · a nova tendência começa a ser calculada na noite do dia do reajuste`;
+    if(!A){cards.append(el('div',{class:'card empty'},'O reajuste de '+dBR(RA.data)+' ainda não foi comparado com a previsão.'));}
+    else for(const p of PRODS){const pr=A.previsto&&A.previsto[p];if(!pr)continue;const re=A.real&&A.real[p],rp=A.realPct&&A.realPct[p],hit=A.acerto&&A.acerto[p];
+      const dr=rp==null?null:rp>1?'alta':rp<-1?'queda':'estavel';
+      cards.append(el('div',{class:'card trend'},
+        el('div',{class:'lab'},PNAME[p]),
+        el('div',{class:'dir'},el('span',{class:'arrow '+(dr?DIRC[dr]:'flat')},dr?DIRA[dr]:'·'),el('div',{},el('div',{class:'word'},'Real: '+(re!=null?brl(re)+'/L':'—')+(rp!=null?' ('+pct(rp)+')':'')),el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertamos':'erramos'))),
+        el('div',{class:'range'},'Previsto na véspera: '+DIRA[pr]+' '+(pr==='estavel'?'estável':pr)+(A.faixaPct&&A.faixaPct[p]?' ('+pct(A.faixaPct[p][0])+' a '+pct(A.faixaPct[p][1])+')':'')),
+        A.nota&&p==='GAA'?null:null));}
+    if(A&&A.nota)cards.append(el('div',{class:'card note-box',style:'grid-column:1/-1'},el('b',{},'O que aconteceu: '),A.nota));
+  }
+  if(!conf){
   const g=L.geradoEm?new Date(L.geradoEm):null;
   $('#tdStatus').textContent=`Leitura de ${dBR(L.data)}${g?' às '+g.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${L.parcial?' · parcial ('+L.parcial+')':''} · próximo reajuste esperado ${dBR(L.proxReajuste)}`;
   for(const p of PRODS){const t=L.produtos&&L.produtos[p];if(!t)continue;
@@ -712,6 +729,7 @@ function renderTendencia(){
       el('td',{},el('span',{class:'eff '+DIRC[t.dir]},DIRA[t.dir]+' '+(t.dir==='estavel'?'estável':t.dir))),
       el('td',{class:'r num'},t.dir==='estavel'?'±0,0000':brl(lo)+' a '+brl(hi)),
       el('td',{class:'r num'},t.dir==='estavel'?f4(c.total):f4(c.total+lo)+' – '+f4(c.total+hi))));}
+  }
   // placar
   const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0,fo=0,ft=0;const st={GAA:{o:0,t:0},S10:{o:0,t:0},S500:{o:0,t:0}};
   const av=T.filter(x=>x.avaliacao).sort((a,b)=>a.data<b.data?1:-1);
