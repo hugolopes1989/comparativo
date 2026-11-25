@@ -222,7 +222,7 @@ input.val{width:110px;text-align:right}
     <div class="section-h"><h2>Assertividade da previsão</h2><span class="hint" id="tdPlacarResumo"></span></div>
     <div class="kpis" id="tdKpis" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))"></div>
     <div class="card tablewrap"><table id="tdPlacar"><thead><tr><th>Reajuste</th><th>Gasolina A</th><th>Diesel S10</th><th>Diesel S500</th><th>Observação</th></tr></thead><tbody></tbody></table></div>
-    <p class="hint" style="margin-top:10px">Como é calculado (modelo de 100 semanas): a Acelen corrige aos poucos a distância entre o preço dela e o custo internacional em reais da semana de quinta a quarta. Gasolina segue o Brent × dólar; diesel segue o diesel de Nova York × dólar. Testado semana a semana só com dados anteriores, acertou a direção em 84% das mudanças. Mostra a direção provável, não o valor exato. Na quinta do reajuste, esta aba mostra a confirmação da semana; a nova tendência começa à noite.</p>
+    <p class="hint" style="margin-top:10px">Como é calculado (modelo de 104 semanas, dez/24 a nov/26): a Acelen corrige aos poucos a distância entre o preço dela e o custo internacional em reais da semana de quinta a quarta. Gasolina segue o Brent × dólar; diesel segue o diesel de Nova York × dólar. Testado em 74 semanas só com dados anteriores a cada uma: quando o preço mudou, acertou se ia subir ou cair em 35 de 42 vezes na gasolina e 47 de 49 no diesel; com sinal forte (3 barras), acertou o sentido em 25 de 25. Acertar também quando a Acelen deixa o preço parado é mais difícil: alta, queda ou estável certos em cerca de 6 de cada 10 semanas. Mostra a direção provável, não o valor exato. Na quinta do reajuste, esta aba mostra a confirmação da semana; a nova tendência começa à noite.</p>
   </section>
 
   <!-- VARIACAO -->
@@ -707,6 +707,7 @@ function renderTendencia(){
       el('div',{class:'lab'},PNAME[p]),
       el('div',{class:'dir'},el('span',{class:'arrow '+DIRC[t.dir]},DIRA[t.dir]),el('div',{},el('div',{class:'word'},DIRW[t.dir]),forceEl(t.forca||1))),
       el('div',{class:'range'},rng),
+      t.sentido?el('div',{class:'range',style:'color:var(--text-2);font-weight:600'},t.sentido):null,
       t.motivo?el('div',{class:'range',style:'color:var(--text-3)'},t.motivo):null));
   }
   $('#tdJanela').textContent=L.janela?`Média ${L.janela.anterior} × ${L.janela.atual}`:'';
@@ -731,13 +732,15 @@ function renderTendencia(){
       el('td',{class:'r num'},t.dir==='estavel'?f4(c.total):f4(c.total+lo)+' – '+f4(c.total+hi))));}
   }
   // placar
-  const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0,fo=0,ft=0;const st={GAA:{o:0,t:0},S10:{o:0,t:0},S500:{o:0,t:0}};
+  const pt=$('#tdPlacar tbody');pt.replaceChildren();let ok=0,tot=0,fo=0,ft=0,so=0,stt=0;const st={GAA:{o:0,t:0},S10:{o:0,t:0},S500:{o:0,t:0}};
   const av=T.filter(x=>x.avaliacao).sort((a,b)=>a.data<b.data?1:-1);
   const cell=(x,p)=>{const a=x.avaliacao,pr=a.previsto&&a.previsto[p],re=a.real&&a.real[p];if(!pr)return el('td',{class:'muted'},'—');
     const hit=a.acerto&&a.acerto[p];if(hit!=null&&!a.reconstituido){tot++;if(hit)ok++;st[p].t++;if(hit)st[p].o++;}
     const nf=a.naFaixa&&a.naFaixa[p];if(nf!=null&&!a.reconstituido){ft++;if(nf)fo++;}
     const rp=a.realPct&&a.realPct[p],fx=a.faixaPct&&a.faixaPct[p];
-    return el('td',{},el('span',{class:'eff '+DIRC[pr]},'Previsto '+DIRA[pr]),fx?el('span',{class:'muted num'},' '+pct(fx[0])+' a '+pct(fx[1])):null,' ',el('span',{class:'muted'},'· real '),re!=null?el('span',{class:'num '+(re>0?'delta-up':re<0?'delta-down':'muted')},brl(re)+(rp!=null?' ('+pct(rp)+')':'')):'—',' ',hit==null?null:el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertou':'errou'),nf==null?null:el('span',{class:'okbadge '+(nf?'y':'p'),style:'margin-left:4px'},nf?'na faixa':'fora da faixa'));};
+    const dm=x.modelo&&x.modelo.delta?x.modelo.delta[p]:null;let sen=null;
+    if(dm!=null&&rp!=null&&Math.abs(rp)>1&&dm!==0){sen=Math.sign(dm)===Math.sign(rp);if(!a.reconstituido){stt++;if(sen)so++;}}
+    return el('td',{},sen==null?null:el('span',{class:'okbadge '+(sen?'y':'n'),style:'margin-right:4px'},sen?'sentido certo':'sentido errado'),el('span',{class:'eff '+DIRC[pr]},'Previsto '+DIRA[pr]),fx?el('span',{class:'muted num'},' '+pct(fx[0])+' a '+pct(fx[1])):null,' ',el('span',{class:'muted'},'· real '),re!=null?el('span',{class:'num '+(re>0?'delta-up':re<0?'delta-down':'muted')},brl(re)+(rp!=null?' ('+pct(rp)+')':'')):'—',' ',hit==null?null:el('span',{class:'okbadge '+(hit?'y':'n')},hit?'acertou':'errou'),nf==null?null:el('span',{class:'okbadge '+(nf?'y':'p'),style:'margin-left:4px'},nf?'na faixa':'fora da faixa'));};
   for(const x of av){const a=x.avaliacao;
     pt.append(el('tr',{},el('td',{class:'num'},dBR(a.reajuste),a.reconstituido?el('div',{class:'hint'},'reconstituído'):null),cell(x,'GAA'),cell(x,'S10'),cell(x,'S500'),
       el('td',{style:'white-space:normal;min-width:220px'},a.nota?el('span',{class:'hint'},a.nota):'')));}
@@ -747,7 +750,9 @@ function renderTendencia(){
   $('#tdPlacarResumo').textContent=tot?`${nReaj} reajuste${nReaj>1?'s':''} avaliado${nReaj>1?'s':''} · conta a última leitura antes de cada reajuste`+(nRec?` · ${nRec} avaliação(ões) montada(s) depois do reajuste fora do placar`:''):'Começa a contar a partir do próximo reajuste';
   const kp=$('#tdKpis');kp.replaceChildren();
   const kpi=(lab,o,t,note)=>el('div',{class:'card kpi'},el('div',{class:'lab'},lab),el('div',{class:'big num'},t?Math.round(o/t*100)+'%':'—'),el('div',{class:'note'},t?note(o,t):'Ainda sem reajuste avaliado'));
-  kp.append(kpi('Acerto de direção · geral',ok,tot,(o,t)=>`${o} de ${t} previsões (alta, queda ou estável)`));
+  kp.append(kpi('Sentido · quando o preço mudou',so,stt,(o,t)=>`${o} de ${t}: subiu ou caiu como o modelo apontava`));
+  if(!stt)kp.lastChild.querySelector('.note').textContent='Conta os reajustes de mais de 1% avaliados com o modelo novo';
+  kp.append(kpi('Alta, queda ou estável · geral',ok,tot,(o,t)=>`${o} de ${t} previsões com as três opções`));
   for(const p of PRODS)kp.append(kpi(PNAME[p],st[p].o,st[p].t,(o,t)=>`${o} de ${t} reajustes na direção certa`));
   kp.append(kpi('Dentro da faixa estimada',fo,ft,(o,t)=>`${o} de ${t}: o reajuste real caiu no intervalo previsto`));
   if(!ft)kp.lastChild.querySelector('.note').textContent='Começa a contar no próximo reajuste (as avaliações antigas não tinham faixa)';
