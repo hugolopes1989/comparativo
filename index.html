@@ -193,8 +193,8 @@ input.val{width:110px;text-align:right}
           <th class="r"><span class="tag"><span class="dot" style="background:var(--acelen)"></span>Acelen</span></th>
           <th class="r">Dif. Acelen − PB</th>
           <th>Mais barata</th>
-          <th class="r">Referência Acelen</th>
-          <th class="r">Referência PB</th>
+          <th class="r">Var. Acelen</th>
+          <th class="r">Var. PB</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -400,7 +400,7 @@ function renderKPIs(rows){
   }
 }
 function refDate(f,b,p){const key=b+'|'+p;const s=snapsOf(f);for(let i=s.length-1;i>=0;i--){const it=s[i].itens&&s[i].itens[key];if(it&&+it.valor>0)return (s[i].vigencias&&s[i].vigencias[p])||s[i].data;}return null;}
-function refSpan(f,b,p){const d=refDate(f,b,p);return d?el('span',{class:'num',title:'Vigência do preço: '+dBR(d)},dBR(d)):el('span',{class:'muted num'},'—');}
+function refSpan(f,b,p){const d=refDate(f,b,p);return d?el('div',{class:'hint',title:'Vigência do preço: '+dBR(d)},'ref. '+dBR(d)):null;}
 function deltaSpan(cur,prev){if(!cur||!prev)return el('span',{class:'muted num'},'—');const d=cur.total-prev.total;if(Math.abs(d)<0.00005)return el('span',{class:'muted num',title:'desde '+dBR(prev.data)},'0,0000');return el('span',{class:'num '+(d>0?'delta-up':'delta-down'),title:'desde '+dBR(prev.data)},(d>0?'▲ ':'▼ ')+sgn(d));}
 function renderPainel(){
   const rows=cmpRows();renderKPIs(rows);
@@ -423,15 +423,15 @@ function renderPainel(){
       bar=el('span',{class:'bar'},el('i',{style:`width:${w}%;${r.diff>0?'left:50%':'right:50%'};background:${r.diff>0?'var(--pb)':'var(--acelen)'}`}));
       cheap=r.diff>0?el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--pb)'}),'Petrobras'):r.diff<0?el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--acelen)'}),'Acelen'):el('span',{class:'muted'},'Empate');
     }
-    const cell=(x,m)=>x.cur?el('td',{class:'r'},el('span',{class:'num'},f4(x.cur.total)),el('div',{class:'hint'},m||'')):el('td',{class:'r muted'},m?el('span',{title:'Sem preço'},'—'):'não vende');
+    const cell=(x,m)=>x.cur?el('td',{class:'r'},el('span',{class:'num'},f4(x.cur.total)),el('div',{class:'hint'},(m?m+' · ':'')+dBR(x.cur.data))):el('td',{class:'r muted'},m?el('span',{title:'Sem preço'},'—'):'não vende');
     tb.append(el('tr',{},
       state.prodFilter==='todos'?null:el('td',{},baseLabel(r.base)),
       el('td',{},PNAME[r.produto]),
       cell(r.P,modOf('petrobras',r.base,r.produto)),cell(r.A,modOf('acelen',r.base,r.produto)),
       el('td',{class:'r'},el('div',{class:'diffcell'},el('span',{class:'num'},sgn(r.diff)),bar)),
       el('td',{},cheap),
-      el('td',{class:'r'},refSpan('acelen',r.base,r.produto)),
-      el('td',{class:'r'},refSpan('petrobras',r.base,r.produto))
+      el('td',{class:'r'},deltaSpan(r.A.cur,r.A.prev),refSpan('acelen',r.base,r.produto)),
+      el('td',{class:'r'},deltaSpan(r.P.cur,r.P.prev),refSpan('petrobras',r.base,r.produto))
     ));
   }
   // PPI reference
@@ -442,7 +442,7 @@ function renderPainel(){
       tb.append(el('tr',{},state.prodFilter==='todos'?null:el('td',{},'PPI'),el('td',{},PNAME[o.p]),el('td',{class:'r',colspan:2},el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--ppi)'}),'PPI ',el('span',{class:'num',style:'color:var(--text)'},f4(o.x.cur.total))),el('div',{class:'hint'},dBR(o.x.cur.data))),el('td',{}),el('td',{}),el('td',{class:'r'},deltaSpan(o.x.cur,o.x.prev)),el('td',{})));
     }
   }
-  $('#cmpHint').textContent='Total = valor do produto + PIS/COFINS + CIDE + ICMS (+ outros). Referência = data de vigência da tabela de onde saiu o preço atual de cada fornecedor. Diferença positiva = Acelen mais cara.';
+  $('#cmpHint').textContent='Total = valor do produto + PIS/COFINS + CIDE + ICMS (+ outros). Variação comparada ao lançamento anterior de cada fornecedor; embaixo, a data de referência (vigência da tabela) do preço atual. Diferença positiva = Acelen mais cara.';
 }
 
 /* ---------- histórico ---------- */
