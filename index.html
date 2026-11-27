@@ -83,6 +83,17 @@ nav.tabs button[aria-selected="true"]{color:var(--brand-text);border-bottom-colo
 .chip{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--text-2)}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
 .section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 10px}
+.rs-card{max-width:760px}
+#rsTable td,#rsTable th{white-space:nowrap}
+#rsTable .rs-ttl th{background:var(--brand);color:#fff;text-align:center;font-size:14px;padding:10px}
+#rsTable tr.grp td{color:var(--brand-text)}
+#rsTable td.dif{font-weight:700}
+.rs-foot{font-size:11.5px;color:var(--text-3);padding:10px 14px;border-top:1px solid var(--line);line-height:1.45}
+.rs-brand{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--brand);border-bottom:3px solid var(--orange);border-radius:var(--radius) var(--radius) 0 0}
+.rs-brand .hint{color:#dfe5ff}
+#rsTable td{padding:6px 14px}
+#rsTable .rref{font-size:11px;color:var(--text-3);margin-left:6px}
+.rs-brand img{height:28px}
 .section-h h2{font-size:15px;font-weight:700;margin:0;padding-left:10px;border-left:3px solid var(--orange)}
 .hint{font-size:12px;color:var(--text-3)}
 .tablewrap{overflow-x:auto}
@@ -173,6 +184,7 @@ input.val{width:110px;text-align:right}
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="painel" aria-selected="true">Painel</button>
+    <button role="tab" data-tab="resumo" aria-selected="false">Resumo NE</button>
     <button role="tab" data-tab="tendencia" aria-selected="false">Tendência Acelen</button>
     <button role="tab" data-tab="variacao" aria-selected="false">Variação produto final</button>
     <button role="tab" data-tab="ppi" aria-selected="false">Simulador PPI</button>
@@ -207,6 +219,18 @@ input.val{width:110px;text-align:right}
   </section>
 
   <!-- TENDENCIA -->
+  <section id="tab-resumo" class="hide">
+    <div class="section-h" style="margin-top:0"><h2>Resumo para envio</h2><span class="hint">Itaqui, Ipojuca, Cabedelo, Candeias, Jequié e Itabuna · pronto para print</span></div>
+    <div class="card rs-card" id="rsCard">
+      <div class="rs-brand"><img src="logo-larco.png" alt="Larco"><span class="hint" id="rsData"></span></div>
+      <div class="tablewrap"><table id="rsTable"><thead>
+        <tr class="rs-ttl"><th colspan="4">Comparativo de preço Petrobras × Acelen · preço final com impostos (R$/L)</th></tr>
+        <tr><th>Produto</th><th class="r" id="rsHPB">Petrobras</th><th class="r" id="rsHAC">Acelen</th><th class="r">Dif. Acelen − PB</th></tr>
+      </thead><tbody></tbody></table></div>
+      <div class="rs-foot" id="rsFoot"></div>
+    </div>
+  </section>
+
   <section id="tab-tendencia" class="hide">
     <div class="section-h" style="margin-top:0"><h2 id="tdTitulo">Para onde vai o próximo reajuste da Acelen</h2><span class="hint" id="tdStatus"></span></div>
     <div class="trend-grid" id="tdCards"></div>
@@ -445,6 +469,33 @@ function renderPainel(){
     }
   }
   $('#cmpHint').textContent='Total = valor do produto + PIS/COFINS + CIDE + ICMS (+ outros). Variação comparada ao lançamento anterior de cada fornecedor; embaixo, a data de referência (vigência da tabela) do preço atual. Preço final = total da NF por litro: inclui o ICMS retido sobre o anidro (gasolina, R$ 0,7388/L) e sobre o biodiesel (diesel, R$ 0,0688/L). Diferença positiva = Acelen mais cara.';
+}
+
+/* ---------- resumo NE ---------- */
+const RS_BASES=['Itaqui','Ipojuca','Cabedelo','Candeias','Jequié','Itabuna'];
+function renderResumo(){
+  const tb=$('#rsTable tbody');if(!tb)return;tb.replaceChildren();
+  const la=latestDate('acelen'),lp=latestDate('petrobras');
+  $('#rsHPB').textContent='Petrobras';$('#rsHAC').textContent='Acelen '+dBR(la);
+  $('#rsData').textContent='Referência: Acelen '+dBR(la);
+  const pbRefs=new Set();
+  for(const b of RS_BASES){
+    const rows=[];
+    for(const p of PRODS){
+      if(!hasItem('acelen',b,p)&&!hasItem('petrobras',b,p))continue;
+      const key=b+'|'+p;const A=lastTwo('acelen',key).cur,P=lastTwo('petrobras',key).cur;
+      if(!A&&!P)continue;
+      const rp=P?refDate('petrobras',b,p):null;if(rp)pbRefs.add(PNAME[p].split(' ')[0]+' '+dBR(rp));
+      const d=A&&P?A.total-P.total:null;
+      rows.push(el('tr',{},el('td',{},PNAME[p]),
+        el('td',{class:'r'},P?el('span',{class:'num'},'R$ '+f4(P.total)):el('span',{class:'muted'},'—'),P?el('span',{class:'rref'},'ref. '+dBR(rp)):null),
+        el('td',{class:'r'},A?el('span',{class:'num'},'R$ '+f4(A.total)):el('span',{class:'muted'},'—')),
+        el('td',{class:'r dif'},d==null?el('span',{class:'muted'},'—'):el('span',{class:'num',style:'color:'+(d>0?'var(--bad)':'var(--good)')},(d>0?'+':d<0?'−':'')+'R$ '+f4(Math.abs(d))))));
+    }
+    if(!rows.length)continue;
+    tb.append(el('tr',{class:'grp'},el('td',{colspan:4},baseLabel(b))),...rows);
+  }
+  $('#rsFoot').textContent='Preço final = total da NF por litro: valor + PIS/Cofins + CIDE + ICMS, já com o ICMS retido do biodiesel (diesel, R$ 0,0688/L) e do anidro (gasolina, R$ 0,7388/L). Acelen com desconto MP; diesel com subvenção. Petrobras pela tabela vigente ('+[...new Set([...pbRefs].map(x=>x.replace(/^Diesel/,'diesel').replace(/^Gasolina/,'gasolina')))].join(', ')+'). Diferença positiva = Acelen mais cara. Larco Distribuidora.';
 }
 
 /* ---------- histórico ---------- */
@@ -789,7 +840,7 @@ function renderPF(){
 /* ---------- tabs ---------- */
 function showTab(t){
   for(const b of document.querySelectorAll('nav.tabs button'))b.setAttribute('aria-selected',String(b.dataset.tab===t));
-  for(const s of ['painel','tendencia','variacao','ppi','historico','config'])$('#tab-'+s).classList.toggle('hide',s!==t);
+  for(const s of ['painel','resumo','tendencia','variacao','ppi','historico','config'])$('#tab-'+s).classList.toggle('hide',s!==t);
   if(t==='historico')renderChart();
   try{history.replaceState(null,'','#'+t);}catch(e){}
 }
@@ -800,13 +851,13 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 
 function renderAll(){
   if(!state.config)return;
-  renderStatus();renderPainel();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderConfig();renderVariacao();renderTendencia();renderPF();fillMix();
+  renderStatus();renderPainel();renderResumo();initPPI(false);renderPPI();fillHistSelects();if(!$('#tab-historico').classList.contains('hide'))renderChart();renderLanc();renderConfig();renderVariacao();renderTendencia();renderPF();fillMix();
   if($('#ov').classList.contains('open'))checkExisting();
 }
 
 /* ---------- boot ---------- */
 async function boot(){
-  const h=(location.hash||'').slice(1);if(['painel','tendencia','variacao','ppi','historico','config'].includes(h))showTab(h);
+  const h=(location.hash||'').slice(1);if(['painel','resumo','tendencia','variacao','ppi','historico','config'].includes(h))showTab(h);
   const D=window.__DADOS;if(!D){msg('bad','Não foi possível carregar os dados do painel.');return;}
   state.canWrite=false;
   ['#btnLancar','#taxSave','#mixSave'].forEach(q=>$(q).classList.add('hide'));
