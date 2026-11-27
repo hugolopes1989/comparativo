@@ -444,7 +444,7 @@ function renderPainel(){
       tb.append(el('tr',{},state.prodFilter==='todos'?null:el('td',{},'PPI'),el('td',{},PNAME[o.p]),el('td',{class:'r',colspan:2},el('span',{class:'tag'},el('span',{class:'dot',style:'background:var(--ppi)'}),'PPI ',el('span',{class:'num',style:'color:var(--text)'},f4(o.x.cur.total))),el('div',{class:'hint'},dBR(o.x.cur.data))),el('td',{}),el('td',{}),el('td',{class:'r'},deltaSpan(o.x.cur,o.x.prev)),el('td',{})));
     }
   }
-  $('#cmpHint').textContent='Total = valor do produto + PIS/COFINS + CIDE + ICMS (+ outros). Variação comparada ao lançamento anterior de cada fornecedor; embaixo, a data de referência (vigência da tabela) do preço atual. Diferença positiva = Acelen mais cara.';
+  $('#cmpHint').textContent='Total = valor do produto + PIS/COFINS + CIDE + ICMS (+ outros). Variação comparada ao lançamento anterior de cada fornecedor; embaixo, a data de referência (vigência da tabela) do preço atual. Preço final = total da NF por litro: inclui o ICMS retido sobre o anidro (gasolina, R$ 0,7388/L) e sobre o biodiesel (diesel, R$ 0,0688/L). Diferença positiva = Acelen mais cara.';
 }
 
 /* ---------- histórico ---------- */
